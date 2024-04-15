@@ -1,10 +1,11 @@
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function LoginScreen() {
-
+export default function LoginScreen({ route }) {
+    const { userRole } = route.params;
     return (
         <View style={styles.container}>
-            <Text>Login Screen</Text>
+            <Text>Company Profile Screen</Text>
+            <Text>{userRole}</Text>
         </View>
     );
 }

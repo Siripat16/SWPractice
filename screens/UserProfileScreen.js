@@ -1,10 +1,11 @@
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function UserProfileScreen() {
-
+export default function UserProfileScreen({ route }) {
+    const { userRole } = route.params;
     return (
         <View style={styles.container}>
-            <Text>User Profile Screen</Text>
+            <Text>Company Profile Screen</Text>
+            <Text>{userRole}</Text>
         </View>
     );
 }

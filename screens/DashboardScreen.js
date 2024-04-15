@@ -1,9 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, Image, TouchableOpacity  } from 'react-native';
 
-export default function DashboardScreen( {navigation})  {
-    const userRole = 'user';
-    // const userRole = 'admin';
+export default function DashboardScreen( {navigation, route})  {
+    const { userRole } = route.params;
     const eventData = [
         {
             eventID: 'e123456',
@@ -77,7 +76,7 @@ export default function DashboardScreen( {navigation})  {
                 contentContainerStyle={styles.scrollViewContainer}
             >
                 {eventData.map((event, index) => (
-                    <TouchableOpacity key={index} onPress={() => navigation.navigate('Booking', { eventID: event.eventID, type: 'event', user: userRole })}>
+                    <TouchableOpacity key={index} onPress={() => navigation.navigate('Booking', { eventID: event.eventID, type: 'event'})}>
                         <View style={styles.box}>
                             <Image source={{ uri: event.CompanyInfo.Image }} style={styles.image} />
                             <Text style={styles.eventName}>{event.eventName}</Text>
@@ -89,7 +88,7 @@ export default function DashboardScreen( {navigation})  {
             <Text style={styles.header}>Your Bookings</Text>
             <ScrollView style={styles.bookingScrollView}>
                 {bookingData.map((booking, index) => (
-                    <TouchableOpacity key={index} onPress={() => navigation.navigate('Booking', { bookingID: booking.bookingID, type: 'booking', user: userRole })}>
+                    <TouchableOpacity key={index} onPress={() => navigation.navigate('Booking', { bookingID: booking.bookingID, type: 'booking'})}>
                         <View style={styles.bookingBox}>
                             <Text style={styles.bookingDate}>{booking.date}</Text>
                             <Text style={styles.bookingCompanyName}>{booking.companyName}</Text>

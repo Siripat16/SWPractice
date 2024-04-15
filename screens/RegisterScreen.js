@@ -1,10 +1,11 @@
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function RegisterScreen() {
-
+export default function RegisterScreen({ route }) {
+    const { userRole } = route.params;
     return (
         <View style={styles.container}>
-            <Text>Register Screen</Text>
+            <Text>Company Profile Screen</Text>
+            <Text>{userRole}</Text>
         </View>
     );
 }
