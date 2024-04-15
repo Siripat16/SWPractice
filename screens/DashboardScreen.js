@@ -2,10 +2,11 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, Image, TouchableOpacity  } from 'react-native';
 
 export default function DashboardScreen( {navigation})  {
-    // const userRole = 'user';
-    const userRole = 'admin';
+    const userRole = 'user';
+    // const userRole = 'admin';
     const eventData = [
         {
+            eventID: 'e123456',
             eventName: 'META x Chula Job Fair 2024',
             eventDescription: 'Best opportunity to get hiredBest opportunity to get hired',
             CompanyInfo: {
@@ -14,6 +15,7 @@ export default function DashboardScreen( {navigation})  {
             }
         },
         {
+            eventID: 'e123457',
             eventName: 'Amazon x Chula Job Fair 2024',
             eventDescription: 'Best opportunity to get hiredBest opportunity to get hired',
             CompanyInfo: {
@@ -22,6 +24,7 @@ export default function DashboardScreen( {navigation})  {
             }
         },
         {
+            eventID: 'e123458',
             eventName: 'Google x Chula Job Fair 2024',
             eventDescription: 'Best opportunity to get hiredBest opportunity to get hired',
             CompanyInfo: {
@@ -33,18 +36,21 @@ export default function DashboardScreen( {navigation})  {
 
     const bookingData = [
         {
+            bookingID: 'b123456',
             date: '1 Jan 2024',
             time: '11:00 AM',
             companyName: 'Google',
             position: 'Software Engineer',
         },
         {
+            bookingID: 'b123457',
             date: '2 Jan 2024',
             time: '10:00 AM',
             companyName: 'Amazon',
             position: 'Data Analyst',
         },
         {
+            bookingID: 'b123458',
             date: '3 Jan 2024',
             time: '9:00 AM',
             companyName: 'META',
@@ -59,7 +65,7 @@ export default function DashboardScreen( {navigation})  {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 25 }}>
                 <Text style={styles.header}>For You</Text>
                 {userRole === 'admin' && (
-                    <TouchableOpacity onPress={() => navigation.navigate('Booking')}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Booking', { type: 'create' })}>
                         <Text style={styles.createButton}>Create</Text>
                     </TouchableOpacity>
                 )}
@@ -71,7 +77,7 @@ export default function DashboardScreen( {navigation})  {
                 contentContainerStyle={styles.scrollViewContainer}
             >
                 {eventData.map((event, index) => (
-                    <TouchableOpacity key={index} onPress={() => navigation.navigate('Booking')}>
+                    <TouchableOpacity key={index} onPress={() => navigation.navigate('Booking', { eventID: event.eventID, type: 'event', user: userRole })}>
                         <View style={styles.box}>
                             <Image source={{ uri: event.CompanyInfo.Image }} style={styles.image} />
                             <Text style={styles.eventName}>{event.eventName}</Text>
@@ -83,7 +89,7 @@ export default function DashboardScreen( {navigation})  {
             <Text style={styles.header}>Your Bookings</Text>
             <ScrollView style={styles.bookingScrollView}>
                 {bookingData.map((booking, index) => (
-                    <TouchableOpacity key={index} onPress={() => navigation.navigate('Booking')}>
+                    <TouchableOpacity key={index} onPress={() => navigation.navigate('Booking', { bookingID: booking.bookingID, type: 'booking', user: userRole })}>
                         <View style={styles.bookingBox}>
                             <Text style={styles.bookingDate}>{booking.date}</Text>
                             <Text style={styles.bookingCompanyName}>{booking.companyName}</Text>
