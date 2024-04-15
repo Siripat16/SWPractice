@@ -59,43 +59,43 @@ export default function App() {
         <Stack.Screen name='Login' 
           component={LoginScreen} 
           options={({ route }) => ({
-            title: route.params.name
+            title: route.params?.name || 'Login'
           })}
         />
         <Stack.Screen name='Register' 
           component={RegisterScreen} 
           options={({ route }) => ({
-            title: route.params.name
+            title: route.params?.name || 'Register'
           })}
         />
         <Stack.Screen name='UserProfile' 
           component={UserProfileScreen} 
           options={({ route }) => ({
-            title: route.params.name
+            title: route.params?.name || 'UserProfile'
           })}
         />
         <Stack.Screen name='CompanyProfile' 
           component={CompanyProfileScreen} 
           options={({ route }) => ({
-            title: route.params.name
+            title: route.params?.name || 'CompanyProfile'
           })}
         />
         <Stack.Screen name='Dashboard' 
           component={DashboardScreen} 
           options={({ route }) => ({
-            title: route.params.name
+            title: route.params?.name || 'Dashboard'
           })}
         />
         <Stack.Screen name='Event' 
           component={EventScreen} 
           options={({ route }) => ({
-            title: route.params.name
+            title: route.params?.name || 'Event'
           })}
         />
         <Stack.Screen name='Booking' 
           component={BookingScreen} 
           options={({ route }) => ({
-            title: route.params.name
+            title: route.params?.name || 'Booking'
           })}
         />
       </Stack.Navigator>

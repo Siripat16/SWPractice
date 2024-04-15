@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, Image, TouchableOpacity  } from 'react-native';
 
-export default function DashboardScreen() {
+export default function DashboardScreen( {navigation})  {
+    // const userRole = 'user';
+    const userRole = 'admin';
     const eventData = [
         {
             eventName: 'META x Chula Job Fair 2024',
@@ -54,7 +56,14 @@ export default function DashboardScreen() {
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
-            <Text style={styles.header}>For You</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 25 }}>
+                <Text style={styles.header}>For You</Text>
+                {userRole === 'admin' && (
+                    <TouchableOpacity onPress={() => navigation.navigate('Booking')}>
+                        <Text style={styles.createButton}>Create</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
             <ScrollView 
                 horizontal={true}
                 style={styles.horizontalScroll}
@@ -62,28 +71,32 @@ export default function DashboardScreen() {
                 contentContainerStyle={styles.scrollViewContainer}
             >
                 {eventData.map((event, index) => (
-                    <View key={index} style={styles.box}>
-                        <Image source={{ uri: event.CompanyInfo.Image }} style={styles.image} />
-                        <Text style={styles.eventName}>{event.eventName}</Text>
-                        <Text style={styles.eventDescription}>{event.eventDescription}</Text>
-                        
-                    </View>
+                    <TouchableOpacity key={index} onPress={() => navigation.navigate('Booking')}>
+                        <View style={styles.box}>
+                            <Image source={{ uri: event.CompanyInfo.Image }} style={styles.image} />
+                            <Text style={styles.eventName}>{event.eventName}</Text>
+                            <Text style={styles.eventDescription}>{event.eventDescription}</Text>
+                        </View>
+                    </TouchableOpacity>
                 ))}
             </ScrollView>
             <Text style={styles.header}>Your Bookings</Text>
             <ScrollView style={styles.bookingScrollView}>
                 {bookingData.map((booking, index) => (
-                    <View key={index} style={styles.bookingBox}>
-                        <Text style={styles.bookingDate}>{booking.date}</Text>
-                        <Text style={styles.bookingCompanyName}>{booking.companyName}</Text>
-                        <Text style={styles.bookingPosition}>{booking.position}</Text>
-                        <Text style={styles.bookingTime}>{booking.time}</Text>
-                    </View>
+                    <TouchableOpacity key={index} onPress={() => navigation.navigate('Booking')}>
+                        <View style={styles.bookingBox}>
+                            <Text style={styles.bookingDate}>{booking.date}</Text>
+                            <Text style={styles.bookingCompanyName}>{booking.companyName}</Text>
+                            <Text style={styles.bookingPosition}>{booking.position}</Text>
+                            <Text style={styles.bookingTime}>{booking.time}</Text>
+                        </View>
+                    </TouchableOpacity>
                 ))}
             </ScrollView>
         </SafeAreaView>
     );
 }
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -182,5 +195,10 @@ const styles = StyleSheet.create({
         fontSize: 15,
         color: '#555',
         marginTop: 5,
+    },
+    createButton: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#007BFF', // Bootstrap primary blue
     },
 });
