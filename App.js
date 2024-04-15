@@ -15,7 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const [isModalVisible, setModalVisible] = useState(false);
+  // const [isModalVisible, setModalVisible] = useState(false);
   return (
     <NavigationContainer>
       <Stack.Navigator
