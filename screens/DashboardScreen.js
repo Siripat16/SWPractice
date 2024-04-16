@@ -61,7 +61,7 @@ export default function DashboardScreen( {navigation, route})  {
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 25 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight:20, paddingTop: 25 }}>
                 <Text style={styles.header}>For You</Text>
                 {userRole === 'admin' && (
                     <TouchableOpacity onPress={() => navigation.navigate('Booking', { type: 'create' })}>
@@ -113,13 +113,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 10,
         paddingTop: 25,
-        backgroundColor: '#f8f9fa', // Light gray background for headers
+        // backgroundColor: '#f8f9fa', // Light gray background for headers
         color: '#333', // Darker text color for better readability
         borderBottomWidth: 1,
         borderBottomColor: '#e1e4e8', // Subtle separation
     },
     horizontalScroll: {
-        height: 250,
+        height: 350,
         marginTop: 5, // Give some space from the header
     },
     scrollViewContainer: {
