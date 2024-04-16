@@ -1,13 +1,11 @@
 import { View, Text, StyleSheet } from "react-native";
 
-export default function LoginScreen({ route }) {
-    const { userRole } = route.params;
-    return (
-        <View style={styles.container}>
-            <Text>Login Screen</Text>
-            <Text>{userRole}</Text>
-        </View>
-    );
+export default function LoginScreen() {
+  return (
+    <View style={styles.container}>
+      <Text>Login Screen</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
