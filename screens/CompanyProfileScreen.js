@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, Image, Button, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 
 export default function CompanyProfileScreen({ navigation }) {
-    // Mock data for company profile
     const [companyProfile, setCompanyProfile] = useState({
-        logoUrl: "https://images.unsplash.com/photo-1529612700005-e35377bf1415?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Placeholder for company logo/banner
+        logoUrl: "https://images.unsplash.com/photo-1529612700005-e35377bf1415?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
         name: "Tech Innovations Inc.",
         description: "We lead the way in innovative technology solutions, providing next-generation services and products across the globe.",
         phone: "+1234567890",
@@ -13,23 +12,23 @@ export default function CompanyProfileScreen({ navigation }) {
     const [editable, setEditable] = useState(false);
 
     const handleEdit = () => {
-        setEditable(!editable); // Toggle edit mode
+        setEditable(!editable);
     };
 
     const handleLogout = () => {
         console.log('Logout button tapped');
-        // Here you would usually handle navigation to the login screen or logout logic
-        // navigation.navigate('Login');
+        navigation.navigate('Home');
     };
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
+            <TouchableOpacity onPress={handleEdit} style={styles.editButton}>
+                <Text style={styles.editButtonText}>{editable ? 'Save' : 'Edit'}</Text>
+            </TouchableOpacity>
             <View style={styles.bannerContainer}>
                 <Image source={{ uri: companyProfile.logoUrl }} style={styles.banner} resizeMode="cover" />
-                <TouchableOpacity onPress={handleEdit} style={styles.editButton}>
-                    <Text style={styles.editButtonText}>{editable ? 'Save' : 'Edit'}</Text>
-                </TouchableOpacity>
             </View>
+            
 
             {editable ? (
                 <TextInput
@@ -84,17 +83,17 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'flex-start', // Adjusted for content alignment at the start
+        justifyContent: 'flex-start',
         paddingVertical: 20,
     },
     bannerContainer: {
         width: '100%',
-        marginBottom: 20, // Additional spacing
+        marginBottom: 20,
     },
     banner: {
         width: '100%',
         height: 200,
-        marginBottom: 10, // Additional space below the banner
+        marginBottom: 10,
     },
     nameText: {
         fontSize: 24,
@@ -125,22 +124,22 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     descriptionInput: {
-        minHeight: 100, // Allow room for multi-line input
+        minHeight: 100,
     },
     editButton: {
-        position: 'absolute',
-        right: 10,
-        top: 10, // Positioned to be visible and accessible
-        backgroundColor: '#4CAF50',
+        marginBottom: 10,
+        alignSelf: 'flex-end',
         padding: 8,
-        borderRadius: 5,
+
     },
     editButtonText: {
-        color: 'white',
+        color: '#0000EE',
         fontSize: 16,
     },
     logoutButton: {
-        width: '80%',
-        marginBottom: 20,
+        position: 'absolute',
+        bottom: 50,
+        alignSelf: 'center',
+        width: '80%'
     }
 });

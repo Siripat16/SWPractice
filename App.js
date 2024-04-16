@@ -12,8 +12,8 @@ import CompanyProfileScreen from './screens/CompanyProfileScreen';
 import { Pressable, Text } from 'react-native';
 
 const Stack = createNativeStackNavigator();
-// const userRole = 'admin';  
-const userRole = 'user'; 
+const userRole = 'admin';  
+// const userRole = 'user'; 
 
 export default function App() {
   return (

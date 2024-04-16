@@ -64,7 +64,7 @@ export default function UserProfileScreen({ navigation }) {
                     value={userProfile.name}
                 />
             ) : (
-                <Text style={styles.infoText}>{userProfile.name}</Text>
+                <Text style={styles.nameText}>{userProfile.name}</Text>
             )}
 
             {editable ? (
@@ -110,28 +110,37 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 20,
+        justifyContent: 'flex-start', // Start aligning content from the top
+        paddingTop: 50, // Reduced padding at the top
+        paddingBottom: 20,
+        gap: 5,
     },
     profilePic: {
         width: 120,
         height: 120,
         borderRadius: 60,
+        marginTop: 20, // Adding a bit of top margin to elevate from the very top
         marginBottom: 20,
     },
     infoText: {
         fontSize: 18,
         color: '#333',
-        marginBottom: 10,
+        marginBottom: 5, // Reduced to tighten the layout
     },
+    nameText: {
+        fontSize: 18,
+        color: '#333',
+        marginBottom: 5,
+        fontWeight: 'bold', // Apply bold font weight
+    },    
     input: {
         fontSize: 18,
         color: '#333',
-        marginBottom: 10,
+        marginBottom: 5, // Tightening the input layout
         borderWidth: 1,
         borderColor: '#ccc',
         padding: 10,
-        width: '80%',
+        width: '90%', // Increased width for better appearance
         borderRadius: 5,
     },
     editButton: {
@@ -139,11 +148,12 @@ const styles = StyleSheet.create({
         right: 10,
         top: 10,
         padding: 8,
-        backgroundColor: '#4CAF50',
+        // backgroundColor: '#4CAF50',
         borderRadius: 5,
     },
     editButtonText: {
-        color: 'white',
+        color: '#0000EE',
+        textDecorationLine: 'underline', // Ensure text is underlined
         fontSize: 16,
     },
     resumeButton: {
@@ -157,38 +167,9 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     logoutButton: {
-        width: '80%',
-        marginBottom: 20,
+        position: 'absolute',
+        bottom: 20, // Lower to ensure it's not too low on devices
+        alignSelf: 'center',
+        width: '90%', // Make button wider for better touch area
     },
-    resumeCard: {
-        width: '90%',
-        backgroundColor: '#f9f9f9',
-        borderRadius: 10,
-        padding: 20,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 4,
-        marginBottom: 20,
-    },
-    resumeTitle: {
-        fontSize: 20,
-        color: '#333',
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    downloadButton: {
-        backgroundColor: '#007BFF',
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 5,
-    },
-    downloadButtonText: {
-        color: 'white',
-        fontSize: 16,
-    },
-
-
 });
