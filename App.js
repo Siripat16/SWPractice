@@ -10,10 +10,10 @@ import RegisterScreen from "./screens/RegisterScreen";
 import UserProfileScreen from "./screens/UserProfileScreen";
 import CompanyProfileScreen from "./screens/CompanyProfileScreen";
 import { Pressable, Text } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 
 const Stack = createNativeStackNavigator();
-const userRole = "admin"; //or 'user'
+const userRole = "admin";
+// const userRole = 'user';
 
 export default function App() {
   // const [isModalVisible, setModalVisible] = useState(false);
@@ -37,74 +37,66 @@ export default function App() {
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          // initialParams={{ result: "Initial Result" }}
-          // options={{
-          //   title: "Welcome home",
-          //   headerStyle: {
-          //     backgroundColor: '#6a51ae'
-          //   },
-          //   headerTintColor: '#fff',
-          //   headerTitleStyle: {
-          //     fontWeight: 'bold'
-          //   },
-          //   headerRight: () => (
-          //     <Pressable onPress={() => alert('Menu button pressed!')}>
-          //       <Text style={{color: '#fff', fontSize: 16}}>Menu</Text>
-          //     </Pressable>
-          //   ),
-          //   contentStyle: {
-          //     backgroundColor: '#e8e4f3'
-          //   }
-          // }}
+          initialParams={{ userRole: userRole }}
+          options={({ navigation }) => ({
+            title: "Home",
+            headerTitleStyle: {
+              fontWeight: "bold",
+            },
+            headerRight: () => (
+              <Pressable
+                onPress={() => {
+                  const targetScreen =
+                    userRole === "admin" ? "CompanyProfile" : "UserProfile";
+                  navigation.navigate(targetScreen, { userRole });
+                }}>
+                <Text style={{ color: "#fff", fontSize: 16 }}>Profile</Text>
+              </Pressable>
+            ),
+          })}
         />
+        {/* Add initialParams to each screen similarly */}
         <Stack.Screen
           name="Login"
           component={LoginScreen}
-          options={({ route }) => ({
-            title: route.params.name,
-          })}
+          initialParams={{ userRole: userRole }}
+          options={{ title: "Login" }}
         />
         <Stack.Screen
           name="Register"
           component={RegisterScreen}
-          options={({ route }) => ({
-            title: route.params.name,
-          })}
+          initialParams={{ userRole: userRole }}
+          options={{ title: "Register" }}
         />
         <Stack.Screen
           name="UserProfile"
           component={UserProfileScreen}
-          options={({ route }) => ({
-            title: route.params.name,
-          })}
+          initialParams={{ userRole: userRole }}
+          options={{ title: "UserProfile" }}
         />
         <Stack.Screen
           name="CompanyProfile"
           component={CompanyProfileScreen}
-          options={({ route }) => ({
-            title: route.params.name,
-          })}
+          initialParams={{ userRole: userRole }}
+          options={{ title: "CompanyProfile" }}
         />
         <Stack.Screen
           name="Dashboard"
           component={DashboardScreen}
-          options={({ route }) => ({
-            title: route.params.name,
-          })}
+          initialParams={{ userRole: userRole }}
+          options={{ title: "Dashboard" }}
         />
         <Stack.Screen
           name="Event"
           component={EventScreen}
-          options={({ route }) => ({
-            title: route.params.name,
-          })}
+          initialParams={{ userRole: userRole }}
+          options={{ title: "Event" }}
         />
         <Stack.Screen
           name="Booking"
           component={BookingScreen}
-          options={({ route }) => ({
-            title: route.params.name,
-          })}
+          initialParams={{ userRole: userRole }}
+          options={{ title: "Booking" }}
         />
       </Stack.Navigator>
     </NavigationContainer>
