@@ -13,6 +13,7 @@ import { Pressable, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 const Stack = createNativeStackNavigator();
+const userRole = "admin"; //or 'user'
 
 export default function App() {
   // const [isModalVisible, setModalVisible] = useState(false);

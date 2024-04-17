@@ -8,41 +8,66 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform, // Import Platform to handle platform-specific adjustments
 } from "react-native";
 
-export default function SignUpScreen() {
+export default function SignUpScreen({ route }) {
+  const { userRole } = route.params;
+
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      keyboardShouldPersistTaps="handled">
-      <Text style={styles.headerText}>SignUp</Text>
-      <Image source={registrationLogo} style={styles.logo} />
-      <Text>Name</Text>
-      <TextInput placeholder="Name" style={styles.input} />
-      <Text>Tel</Text>
-      <TextInput
-        placeholder="Tel"
-        keyboardType="phone-pad"
-        style={styles.input}
-      />
-      <Text>Email</Text>
-      <TextInput
-        placeholder="Email"
-        keyboardType="email-address"
-        style={styles.input}
-      />
-      <Text>Password</Text>
-      <TextInput placeholder="Password" secureTextEntry style={styles.input} />
-      <Text>Confirm password</Text>
-      <TextInput
-        placeholder="Confirm Password"
-        secureTextEntry
-        style={styles.input}
-      />
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Submit</Text>
-      </TouchableOpacity>
-    </ScrollView>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }} // Take the full height of the screen
+      behavior={Platform.OS === "ios" ? "padding" : "height"} // Adjust behavior based on platform
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0} // Optional offset setting
+    >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled">
+        <Text style={styles.headerText}>SignUp</Text>
+        <Image source={registrationLogo} style={styles.logo} />
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Name</Text>
+          <TextInput placeholder="Name" style={styles.input} />
+        </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Tel</Text>
+          <TextInput
+            placeholder="Tel"
+            keyboardType="phone-pad"
+            style={styles.input}
+          />
+        </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            placeholder="Email"
+            keyboardType="email-address"
+            style={styles.input}
+          />
+        </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            placeholder="Password"
+            secureTextEntry
+            style={styles.input}
+          />
+        </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Confirm password</Text>
+          <TextInput
+            placeholder="Confirm Password"
+            secureTextEntry
+            style={styles.input}
+          />
+        </View>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>Submit</Text>
+        </TouchableOpacity>
+        <Text>{userRole}</Text>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -62,9 +87,17 @@ const styles = StyleSheet.create({
     height: 150,
     marginBottom: 30,
   },
+  inputContainer: {
+    alignSelf: "stretch",
+    alignItems: "flex-start",
+    paddingHorizontal: 20,
+  },
+  label: {
+    alignSelf: "flex-start",
+  },
   input: {
     height: 50,
-    width: "90%", // slightly less than full width for better margins
+    width: "100%",
     marginVertical: 10,
     borderWidth: 1,
     borderColor: "#ddd",
@@ -76,11 +109,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
     padding: 10,
     borderRadius: 5,
-    width: "90%", // matching the width of inputs
+    width: "90%",
   },
   buttonText: {
     color: "#fff",
-    fontSize: 18, // enhanced readability
+    fontSize: 18,
     textAlign: "center",
   },
 });
