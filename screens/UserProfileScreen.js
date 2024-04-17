@@ -1,16 +1,46 @@
-import React, { useState } from 'react';
-import { View, Text, Image, Button, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, Button, StyleSheet, TouchableOpacity, ScrollView, TextInput, Linking, Alert } from 'react-native';
 import axios from 'axios';
 
 export default function UserProfileScreen({ navigation }) {
+    const userID = '661ff9e5774f23adaf3949cb';
     // Initial user profile state with mock data
-    const [userProfile, setUserProfile] = useState({
-        name: "Jane Doe",
-        phoneNumber: "+1234567890",
-        email: "johndoe@example.com",
-        profilePicture: "https://plus.unsplash.com/premium_photo-1683140621573-233422bfc7f1?w=1400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8c3R1ZGVudCUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D",
-        resumeLink: "https://example.com/resume.pdf"
-    });
+    // const [userProfile, setUserProfile] = useState({
+    //     name: "Jane Doe",
+    //     phoneNumber: "+1234567890",
+    //     email: "johndoe@example.com",
+    //     profilePicture: "https://plus.unsplash.com/premium_photo-1683140621573-233422bfc7f1?w=1400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8c3R1ZGVudCUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D",
+    //     resumeLink: "https://example.com/resume.pdf"
+    // });
+    const [userProfile, setUserProfile] = useState({});
+    
+    const fetchUserProfile = async (userID, setUserProfile) => {
+        try {
+            const url = `http://127.0.0.1:2000/api/v1/auth/user/${userID}`;
+            const response = await axios.get(url);
+            console.log(response.data);
+            if (response.data.success && response.data.data) {
+                setUserProfile({
+                    name: response.data.data.name,
+                    email: response.data.data.emailAddress,
+                    phoneNumber: response.data.data.telPhone,
+                    profilePicture: response.data.data.picture
+                });
+            }
+        } catch (error) {
+            console.error('Failed to fetch user profile:', error);
+        }
+    };
+
+    useEffect(() => {
+        if (userID) {
+            fetchUserProfile(userID, setUserProfile);
+        } else {
+            console.error('UserID is missing');
+        }
+    }, [userID]);
+
+
     const [editable, setEditable] = useState(false);
 
     const handleEdit = async () => {
@@ -23,10 +53,17 @@ export default function UserProfileScreen({ navigation }) {
 
     const saveProfileData = async () => {
         try {
-            const response = await axios.post('https://api.example.com/update-profile', userProfile);
-            // Assuming the API returns the updated user profile
-            setUserProfile(response.data);
-            console.log('Profile updated successfully!');
+            const url = `http://127.0.0.1:2000/api/v1/auth/user/${userID}`;
+            const response = await axios.put(url, {
+                name: userProfile.name,
+                emailAddress: userProfile.email,  // Assuming the API expects `emailAddress` as the field name
+                telPhone: userProfile.phoneNumber
+            });
+            if (response.data.success) {
+                setUserProfile(response.data.data);
+                console.log('Profile updated successfully!');
+            }
+            fetchUserProfile(userID, setUserProfile);
         } catch (error) {
             console.error('Failed to update profile:', error);
         }
