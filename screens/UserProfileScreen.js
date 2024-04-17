@@ -13,7 +13,41 @@ export default function UserProfileScreen({ navigation }) {
     //     resumeLink: "https://example.com/resume.pdf"
     // });
     const [userProfile, setUserProfile] = useState({});
+    const [errors, setErrors] = useState({});
+    const [isFormValid, setIsFormValid] = useState(false);
+
+    const validateFields = () => {
+        const newErrors = {};
+        // Validate name
+        if (!userProfile.name) {
+            newErrors.name = "Please add a name.";
+        }
     
+        // Validate email
+        const emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if (!userProfile.email) {
+            newErrors.email = "Email is required.";
+        } else if (!emailRegex.test(userProfile.email)) {
+            newErrors.email = "Please enter a valid email.";
+        }
+    
+        // Validate phone number
+        if (!userProfile.phoneNumber) {
+            newErrors.phoneNumber = "Phone number is required.";
+        } else if (userProfile.phoneNumber.length < 9) {
+            newErrors.phoneNumber = "Phone number must be at least 9 digits.";
+        }
+    
+        setErrors(newErrors);
+        setIsFormValid(Object.keys(newErrors).length === 0);
+    };
+
+    useEffect(() => {
+        validateFields();
+    }, [userProfile.name, userProfile.email, userProfile.phoneNumber]);
+    
+    
+
     const fetchUserProfile = async (userID, setUserProfile) => {
         try {
             const url = `http://127.0.0.1:2000/api/v1/auth/user/${userID}`;
@@ -88,39 +122,62 @@ export default function UserProfileScreen({ navigation }) {
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <TouchableOpacity onPress={handleEdit} style={styles.editButton}>
-                <Text style={styles.editButtonText}>{editable ? 'Save' : 'Edit'}</Text>
+            <TouchableOpacity
+                onPress={handleEdit}
+                style={styles.editButton}
+                disabled={!isFormValid}  // Disable the button if the form is not valid
+            >
+                <Text style={[
+                    styles.editButtonText,
+                    !isFormValid ? styles.disabledText : {}  // Change text color when disabled
+                ]}>
+                    {editable ? 'Save' : 'Edit'}
+                </Text>
             </TouchableOpacity>
+
 
             <Image source={{ uri: userProfile.profilePicture }} style={styles.profilePic} />
 
             {editable ? (
-                <TextInput
-                    style={styles.input}
-                    onChangeText={(text) => setUserProfile({...userProfile, name: text})}
-                    value={userProfile.name}
-                />
+                <>
+                    <TextInput
+                        style={styles.input}
+                        onChangeText={(text) => setUserProfile({...userProfile, name: text})}
+                        value={userProfile.name}
+                        placeholder="Name"
+                    />
+                    {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
+                </>
             ) : (
                 <Text style={styles.nameText}>{userProfile.name}</Text>
             )}
 
             {editable ? (
-                <TextInput
-                    style={styles.input}
-                    onChangeText={(text) => setUserProfile({...userProfile, phoneNumber: text})}
-                    keyboardType="phone-pad"
-                    value={userProfile.phoneNumber}
-                />
+                <>
+                    <TextInput
+                        style={styles.input}
+                        onChangeText={(text) => setUserProfile({...userProfile, phoneNumber: text})}
+                        keyboardType="phone-pad"
+                        value={userProfile.phoneNumber}
+                        placeholder="Phone Number"
+                    />
+                    {errors.phoneNumber && <Text style={styles.errorText}>{errors.phoneNumber}</Text>}
+                </>
             ) : (
                 <Text style={styles.infoText}>{userProfile.phoneNumber}</Text>
             )}
 
             {editable ? (
-                <TextInput
-                    style={styles.input}
-                    onChangeText={(text) => setUserProfile({...userProfile, email: text})}
-                    value={userProfile.email}
-                />
+                <>
+                    <TextInput
+                        style={styles.input}
+                        onChangeText={(text) => setUserProfile({...userProfile, email: text})}
+                        value={userProfile.email}
+                        placeholder="Email"
+                        keyboardType="email-address"
+                    />
+                    {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+                </>
             ) : (
                 <Text style={styles.infoText}>{userProfile.email}</Text>
             )}
@@ -135,11 +192,11 @@ export default function UserProfileScreen({ navigation }) {
                 </TouchableOpacity>
             )}
 
-
             <View style={styles.logoutButton}>
                 <Button title="Logout" onPress={handleLogout} color="#D9534F" />
             </View>
         </ScrollView>
+
     );
 }
 
@@ -208,5 +265,26 @@ const styles = StyleSheet.create({
         bottom: 20, // Lower to ensure it's not too low on devices
         alignSelf: 'center',
         width: '90%', // Make button wider for better touch area
+    },
+    errorText: {
+        fontSize: 14,
+        color: 'red',
+        marginBottom: 5,
+    },
+    editButton: {
+        position: 'absolute',
+        right: 10,
+        top: 10,
+        padding: 8,
+        backgroundColor: 'transparent',
+        borderRadius: 5,
+    },
+    editButtonText: {
+        textDecorationLine: 'underline',
+        fontSize: 16,
+        color: '#0000EE',  // Default active color (blue)
+    },
+    disabledText: {
+        color: '#CCCCCC'  // Gray color for disabled state
     },
 });
