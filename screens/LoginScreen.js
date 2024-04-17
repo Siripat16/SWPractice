@@ -1,4 +1,4 @@
-//Siripat
+//Siripat Sirikul
 import React from "react";
 import {
   View,
