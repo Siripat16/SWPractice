@@ -4,18 +4,11 @@ import axios from 'axios';
 
 export default function UserProfileScreen({ navigation }) {
     const userID = '661ff9e5774f23adaf3949cb';
-    // Initial user profile state with mock data
-    // const [userProfile, setUserProfile] = useState({
-    //     name: "Jane Doe",
-    //     phoneNumber: "+1234567890",
-    //     email: "johndoe@example.com",
-    //     profilePicture: "https://plus.unsplash.com/premium_photo-1683140621573-233422bfc7f1?w=1400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8c3R1ZGVudCUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D",
-    //     resumeLink: "https://example.com/resume.pdf"
-    // });
     const [userProfile, setUserProfile] = useState({});
     const [errors, setErrors] = useState({});
     const [isFormValid, setIsFormValid] = useState(false);
-
+    const [editable, setEditable] = useState(false);
+    
     const validateFields = () => {
         const newErrors = {};
         // Validate name
@@ -52,19 +45,23 @@ export default function UserProfileScreen({ navigation }) {
         try {
             const url = `http://127.0.0.1:2000/api/v1/auth/user/${userID}`;
             const response = await axios.get(url);
-            console.log(response.data);
+            console.log(response.data)
             if (response.data.success && response.data.data) {
+                const profileData = response.data.data;
+                const imageUri = profileData.picture ? `data:image/jpeg;base64,${profileData.picture}` : null;
+    
                 setUserProfile({
-                    name: response.data.data.name,
-                    email: response.data.data.emailAddress,
-                    phoneNumber: response.data.data.telPhone,
-                    profilePicture: response.data.data.picture
+                    name: profileData.name,
+                    email: profileData.emailAddress,
+                    phoneNumber: profileData.telPhone,
+                    profilePicture: imageUri
                 });
             }
         } catch (error) {
             console.error('Failed to fetch user profile:', error);
         }
     };
+    
 
     useEffect(() => {
         if (userID) {
@@ -75,7 +72,7 @@ export default function UserProfileScreen({ navigation }) {
     }, [userID]);
 
 
-    const [editable, setEditable] = useState(false);
+    
 
     const handleEdit = async () => {
         if (editable) {
