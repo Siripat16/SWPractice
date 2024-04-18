@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import registrationLogo from "../assets/registration.png";
 import {
   View,
@@ -9,11 +9,56 @@ import {
   Image,
   ScrollView,
   KeyboardAvoidingView,
-  Platform, // Import Platform to handle platform-specific adjustments
+  Platform,
+  Alert,
 } from "react-native";
+import axios from "axios"; // Import axios to make HTTP requests
+import { useNavigation } from "@react-navigation/native"; // Import useNavigation hook
 
 export default function SignUpScreen({ route }) {
   const { userRole } = route.params;
+  const [formData, setFormData] = useState({
+    name: "",
+    tel: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const navigation = useNavigation(); // Get the navigation object
+
+  // Update the state as the user types
+  const handleInputChange = (name, value) => {
+    setFormData({ ...formData, [name]: value });
+  };
+
+  // Handle form submission
+  const handleSubmit = async () => {
+    if (formData.password !== formData.confirmPassword) {
+      Alert.alert("Passwords do not match");
+      return;
+    }
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/v1/auth/register",
+        {
+          name: formData.name,
+          emailAddress: formData.email,
+          role: userRole, // Pass the role from the route params or set a default
+          password: formData.password,
+          telPhone: formData.tel,
+        }
+      );
+      if (response.data) {
+        navigation.navigate("Login"); // Navigate to Login screen on success
+      }
+    } catch (error) {
+      // Handle errors here
+      Alert.alert(
+        "Registration failed",
+        error.response?.data?.message || "An error occurred"
+      );
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -62,7 +107,7 @@ export default function SignUpScreen({ route }) {
             style={styles.input}
           />
         </View>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
           <Text style={styles.buttonText}>Submit</Text>
         </TouchableOpacity>
         <Text>{userRole}</Text>
