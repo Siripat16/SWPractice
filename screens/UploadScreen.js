@@ -23,12 +23,17 @@ export default function UploadScreen({ navigation }) {
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 1,
+            quality: 0.1,
+            
         });
     
+        // if (!result.cancelled && result.assets && result.assets.length > 0) {
+        //     const uri = result.assets[0].uri;
+        //     setImageUri(uri); // Corrected from setImage to setImageUri
+        // }
         if (!result.cancelled && result.assets && result.assets.length > 0) {
             const uri = result.assets[0].uri;
-            setImageUri(uri); // Corrected from setImage to setImageUri
+            setImageUri(uri);
         }
     };
 
