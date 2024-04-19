@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     },
     detailsContainer: {
         width: '100%',
-        alignItems: 'flex-start',
+        alignItems: 'center',
     },
     detailText: {
         fontSize: 16,
