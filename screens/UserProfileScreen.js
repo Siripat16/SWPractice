@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, Button, StyleSheet, TouchableOpacity, ScrollView, TextInput, Linking, Alert, Platform } from 'react-native';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default function UserProfileScreen({ navigation }) {
     const userID = '661ff9e5774f23adaf3949cb';
@@ -45,10 +46,7 @@ export default function UserProfileScreen({ navigation }) {
     const fetchUserProfile = async (userID, setUserProfile) => {
         try {
             const url = `http://127.0.0.1:2000/api/v1/auth/user/${userID}`;
-            // console.log('url1')
-            // console.log(url)
             const response = await axios.get(url);
-            // console.log(response.data)
             if (response.data.success && response.data.data) {
                 const profileData = response.data.data;
                 const imageUri = profileData.picture ? `data:image/jpeg;base64,${profileData.picture}` : null;
@@ -128,13 +126,10 @@ export default function UserProfileScreen({ navigation }) {
             quality: 1,
         });
     
-        console.log(result); // Log the result to inspect its structure
     
         // Check if the result is not cancelled and assets array is present and not empty
         if (!result.cancelled && result.assets && result.assets.length > 0) {
             const uri = result.assets[0].uri; // Get the URI from the first asset
-            console.log(uri); // Log the URI to confirm it's correct
-    
             setImage(uri); // Update the image state for the preview
             setUserProfile({
                 ...userProfile,
@@ -143,42 +138,51 @@ export default function UserProfileScreen({ navigation }) {
         }
     };
     
-
     const saveProfileData = async () => {
         const formData = new FormData();
         formData.append('name', userProfile.name);
         formData.append('emailAddress', userProfile.email);
         formData.append('telPhone', userProfile.phoneNumber);
         
-        // Include the image only if it has been changed
         if (image && image !== userProfile.profilePicture) {
-            let localUri = image;
-            let filename = localUri.split('/').pop();
-            let match = /\.(\w+)$/.exec(filename);
-            let type = match ? `image/${match[1]}` : `image`;
-    
-            formData.append('profilePicture', { uri: localUri, name: filename, type });
+            const localUri = image.startsWith('file://') ? image : `file://${image}`;
+            const filename = localUri.split('/').pop();
+            const match = /\.(\w+)$/.exec(filename);
+            const type = match ? `image/${match[1]}` : `image`;
+            const file = {
+                uri: localUri,
+                name: filename,
+                type
+            };
+            
+            // Add the file to formData
+            formData.append('profilePicture', file);
         }
+    
+        console.log('FormData contents before sending:', formData);  // This won't necessarily log the contents of formData due to its nature
     
         try {
             const url = `http://127.0.0.1:2000/api/v1/auth/user/${userID}`;
-            const response = await axios.put(url, formData, {
+            const response = await axios({
+                method: 'put',
+                url: url,
+                data: formData,
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                },
+                }
             });
+            
             if (response.data.success) {
-                console.log('Profile updated successfully!');
+                console.log('Profile updated successfully!', response.data);
                 setUserProfile(response.data.data);
+                fetchUserProfile(userID, setUserProfile); // Refetch the profile
             }
-            fetchUserProfile(userID, setUserProfile);
         } catch (error) {
             console.error('Failed to update profile:', error);
         }
     };
     
-
-
+    
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <TouchableOpacity
@@ -195,9 +199,24 @@ export default function UserProfileScreen({ navigation }) {
             </TouchableOpacity>
 
 
-            <TouchableOpacity onPress={editable ? pickImage : undefined}>
-                <Image source={{ uri: userProfile.profilePicture || 'default_image_uri_here' }} style={styles.profilePic} />
+            <TouchableOpacity
+                disabled={!editable}
+                onPress={pickImage}
+                style={[styles.imageWrapper, editable && styles.imageEditable]}
+            >
+                <Image
+                    source={{ uri: userProfile.profilePicture }}
+                    style={[styles.profilePic, { width: '100%', height: '100%', borderRadius: 60 }]}
+                    value={userProfile.profilePicture}
+                />
+                {editable && (
+                    <View style={styles.imageOverlay}>
+                        <Icon name="pencil" size={20} color="#FFF" />
+                        <Text style={styles.imageEditText}>Edit</Text>
+                    </View>
+                )}
             </TouchableOpacity>
+
 
             {editable ? (
                 <>
@@ -347,5 +366,38 @@ const styles = StyleSheet.create({
     },
     disabledText: {
         color: '#CCCCCC'  // Gray color for disabled state
+    },
+    profilePic: {
+        width: '100%',  // Ensure it fills the container
+        height: '100%', // Ensure it fills the container
+        borderRadius: 60,
+        resizeMode: 'cover',  // Add this to maintain aspect ratio while covering the area
+    },
+    imageWrapper: {
+        position: 'relative',
+        width: 120,  // Width of the container
+        height: 120,  // Height of the container
+        borderRadius: 60,  // Match image border radius
+        overflow: 'hidden',  // Hide anything that spills out
+    },
+    imageEditable: {
+        borderWidth: 1,
+        borderColor: '#007BFF',
+    },
+    imageOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 60,  // Ensure full rounding
+    },
+    imageEditText: {
+        color: '#FFF',
+        textAlign: 'center',
+        fontWeight: 'bold',
     },
 });

@@ -10,7 +10,7 @@ import RegisterScreen from "./screens/RegisterScreen";
 import UserProfileScreen from "./screens/UserProfileScreen";
 import CompanyProfileScreen from "./screens/CompanyProfileScreen";
 import { Pressable, Text } from "react-native";
-
+import UploadScreen from "./screens/UploadScreen";
 const Stack = createNativeStackNavigator();
 const userRole = "admin";
 // const userRole = 'user';
@@ -97,6 +97,12 @@ export default function App() {
           component={BookingScreen}
           initialParams={{ userRole: userRole }}
           options={{ title: "Booking" }}
+        />
+        <Stack.Screen
+          name="Upload"
+          component={UploadScreen}
+          initialParams={{ userRole: userRole }}
+          options={{ title: "Upload" }}
         />
       </Stack.Navigator>
     </NavigationContainer>
