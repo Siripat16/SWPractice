@@ -53,12 +53,6 @@ export default function HomeScreen({ navigation, route }) {
                     name: "CompanyProfile"
                 })}} 
             />
-            <Button 
-                title="Go to Upload" 
-                onPress={ () => {navigation.navigate('Upload', {
-                    name: "Upload"
-                })}} 
-            />
         </View>
     );
 }
