@@ -39,15 +39,18 @@ export default function SignUpScreen({ route }) {
     }
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/auth/register",
+        "http://172.20.10.2:8081/api/v1/auth/register",
         {
           name: formData.name,
           emailAddress: formData.email,
-          role: userRole, // Pass the role from the route params or set a default
+          role: userRole,
           password: formData.password,
           telPhone: formData.tel,
         }
       );
+
+      console.log(response); // Log the response
+
       if (response.data) {
         navigation.navigate("Login"); // Navigate to Login screen on success
       }
@@ -64,8 +67,7 @@ export default function SignUpScreen({ route }) {
     <KeyboardAvoidingView
       style={{ flex: 1 }} // Take the full height of the screen
       behavior={Platform.OS === "ios" ? "padding" : "height"} // Adjust behavior based on platform
-      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0} // Optional offset setting
-    >
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}>
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled">
@@ -73,7 +75,11 @@ export default function SignUpScreen({ route }) {
         <Image source={registrationLogo} style={styles.logo} />
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Name</Text>
-          <TextInput placeholder="Name" style={styles.input} />
+          <TextInput
+            placeholder="Name"
+            style={styles.input}
+            onChangeText={(text) => handleInputChange("name", text)}
+          />
         </View>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Tel</Text>
@@ -81,6 +87,7 @@ export default function SignUpScreen({ route }) {
             placeholder="Tel"
             keyboardType="phone-pad"
             style={styles.input}
+            onChangeText={(text) => handleInputChange("tel", text)}
           />
         </View>
         <View style={styles.inputContainer}>
@@ -89,6 +96,7 @@ export default function SignUpScreen({ route }) {
             placeholder="Email"
             keyboardType="email-address"
             style={styles.input}
+            onChangeText={(text) => handleInputChange("email", text)}
           />
         </View>
         <View style={styles.inputContainer}>
@@ -97,6 +105,7 @@ export default function SignUpScreen({ route }) {
             placeholder="Password"
             secureTextEntry
             style={styles.input}
+            onChangeText={(text) => handleInputChange("password", text)}
           />
         </View>
         <View style={styles.inputContainer}>
@@ -105,6 +114,7 @@ export default function SignUpScreen({ route }) {
             placeholder="Confirm Password"
             secureTextEntry
             style={styles.input}
+            onChangeText={(text) => handleInputChange("confirmPassword", text)}
           />
         </View>
         <TouchableOpacity style={styles.button} onPress={handleSubmit}>
