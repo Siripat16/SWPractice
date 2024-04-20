@@ -54,7 +54,7 @@ export default function HomeScreen({ navigation, route }) {
                 })}} 
             />
             <Button 
-                title="Manage Resume" 
+                title="Manage Resume (ไม่ใช้แล้ว จะลบ)" 
                 onPress={ () => {navigation.navigate('ManageResume', {
                     name: "ManageResume"
                 })}} 

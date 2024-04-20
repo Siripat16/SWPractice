@@ -1,249 +1,270 @@
-import React from "react";
+import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  SafeAreaView,
-  Image,
-  TouchableOpacity,
-} from "react-native";
+  View, Text, StyleSheet, ScrollView, SafeAreaView, Image, Button, TouchableOpacity, Alert
+} from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import axios from 'axios';
 
-export default function DashboardScreen({ navigation, route }) {
-  const { userRole } = route.params;
-  const eventData = [
-    {
-      eventID: "e123456",
-      eventName: "META x Chula Job Fair 2024",
-      eventDescription:
-        "Best opportunity to get hiredBest opportunity to get hired",
-      CompanyInfo: {
-        companyID: "1234567",
-        Image:
-          "https://images.unsplash.com/photo-1636051028886-0059ad2383c8?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Assuming this would be a valid URL
-      },
-    },
-    {
-      eventID: "e123457",
-      eventName: "Amazon x Chula Job Fair 2024",
-      eventDescription:
-        "Best opportunity to get hiredBest opportunity to get hired",
-      CompanyInfo: {
-        companyID: "1234568",
-        Image:
-          "https://images.unsplash.com/photo-1523474253046-8cd2748b5fd2?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Assuming this would be a valid URL
-      },
-    },
-    {
-      eventID: "e123458",
-      eventName: "Google x Chula Job Fair 2024",
-      eventDescription:
-        "Best opportunity to get hiredBest opportunity to get hired",
-      CompanyInfo: {
-        companyID: "1234569",
-        Image:
-          "https://images.unsplash.com/photo-1529612700005-e35377bf1415?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Assuming this would be a valid URL
-      },
-    },
-  ];
+export default function DashboardScreen( {navigation, route})  {
+    const { userRole } = route.params;
+    const [eventData, setEventData] = useState([]);
 
-  const bookingData = [
-    {
-      bookingID: "b123456",
-      date: "1 Jan 2024",
-      time: "11:00 AM",
-      companyName: "Google",
-      position: "Software Engineer",
-    },
-    {
-      bookingID: "b123457",
-      date: "2 Jan 2024",
-      time: "10:00 AM",
-      companyName: "Amazon",
-      position: "Data Analyst",
-    },
-    {
-      bookingID: "b123458",
-      date: "3 Jan 2024",
-      time: "9:00 AM",
-      companyName: "META",
-      position: "Product Manager",
-    },
-  ];
+    useEffect(() => {
+        const fetchEvents = async () => {
+          try {
+            const response = await axios.get('http://127.0.0.1:2000/api/v1/events/getEvents');
+            setEventData(response.data.data); // Correctly accessing the data array
+          } catch (error) {
+            console.error('Error fetching event data:', error);
+            Alert.alert('Error', 'Unable to fetch events');
+          }
+        };
+    
+        fetchEvents();
+      }, []);
 
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          paddingRight: 20,
-          paddingTop: 25,
-        }}>
-        <Text style={styles.header}>For You</Text>
-        {userRole === "admin" && (
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Booking", { type: "create" })}>
-            <Text style={styles.createButton}>Create</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-      <ScrollView
-        horizontal={true}
-        style={styles.horizontalScroll}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollViewContainer}>
-        {eventData.map((event, index) => (
-          <TouchableOpacity
-            key={index}
-            onPress={() =>
-              navigation.navigate("Booking", {
-                eventID: event.eventID,
-                type: "event",
-              })
-            }>
-            <View style={styles.box}>
-              <Image
-                source={{ uri: event.CompanyInfo.Image }}
-                style={styles.image}
-              />
-              <Text style={styles.eventName}>{event.eventName}</Text>
-              <Text style={styles.eventDescription}>
-                {event.eventDescription}
-              </Text>
+    const bookingData = [
+        {
+            bookingID: 'b123456',
+            date: '1 Jan 2024',
+            time: '11:00 AM',
+            companyName: 'Google',
+            position: 'Software Engineer',
+        },
+        {
+            bookingID: 'b123457',
+            date: '2 Jan 2024',
+            time: '10:00 AM',
+            companyName: 'Amazon',
+            position: 'Data Analyst',
+        },
+        {
+            bookingID: 'b123458',
+            date: '3 Jan 2024',
+            time: '9:00 AM',
+            companyName: 'META',
+            position: 'Product Manager',
+        },
+    ];
+    
+    const renderRightActions = (progress, dragX, bookingID) => {
+        const onPress = () => {
+            Alert.alert(
+                'Delete Booking',
+                'Are you sure you want to delete this booking?',
+                [
+                    { text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
+                    { text: 'OK', onPress: () => deleteBooking(bookingID) },
+                ],
+                { cancelable: false },
+            );
+        };
+    
+        return (
+            <View style={styles.deleteContainer}>
+                <TouchableOpacity onPress={onPress} style={styles.deleteButton}>
+                    <Text style={{ color: 'white' }}>Delete</Text>
+                </TouchableOpacity>
             </View>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-      <Text style={styles.header}>Your Bookings</Text>
-      <ScrollView style={styles.bookingScrollView}>
-        {bookingData.map((booking, index) => (
-          <TouchableOpacity
-            key={index}
-            onPress={() =>
-              navigation.navigate("Booking", {
-                bookingID: booking.bookingID,
-                type: "booking",
-              })
-            }>
-            <View style={styles.bookingBox}>
-              <Text style={styles.bookingDate}>{booking.date}</Text>
-              <Text style={styles.bookingCompanyName}>
-                {booking.companyName}
-              </Text>
-              <Text style={styles.bookingPosition}>{booking.position}</Text>
-              <Text style={styles.bookingTime}>{booking.time}</Text>
+        );
+    };
+    
+    const deleteBooking = (bookingID) => {
+        console.log(`Booking ${bookingID} deleted`);
+        // Update the state or handle the deletion appropriately
+    };
+    
+
+    return (
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <SafeAreaView style={{ flex: 1 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight:20, paddingTop: 5 }}>
+              <Text style={{ fontSize: 22, fontWeight: 'bold', paddingHorizontal: 20, paddingVertical: 10, paddingTop: 25, color: '#333', borderBottomWidth: 1, borderBottomColor: '#e1e4e8' }}>For You</Text>
+              {userRole === 'admin' && (
+                <TouchableOpacity onPress={() => navigation.navigate('Booking', { type: 'create' })}>
+                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#007BFF' }}>Create</Text>
+                </TouchableOpacity>
+              )}
             </View>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-    </SafeAreaView>
-  );
+            <ScrollView
+              horizontal={true}
+              style={{ height: 380, marginTop: 5 }}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingStart: 10, paddingEnd: 10 }}
+            >
+              {eventData.map((event, index) => (
+                <TouchableOpacity key={index} onPress={() => navigation.navigate('Booking', { eventID: event._id, type: 'event' })}>
+                  <View style={{ width: 200, height: 250, backgroundColor: '#ffffff', margin: 10, borderRadius: 8, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5 }}>
+                    <Image source={{ uri: 'https://example.com/path/to/image.png' }} style={{ width: '100%', height: 120, borderTopLeftRadius: 8, borderTopRightRadius: 8 }} />
+                    <Text style={{ color: '#333', fontSize: 16, fontWeight: 'bold', margin: 10 }}>{event.eventTitle}</Text>
+                    <Text style={{ color: '#666', fontSize: 14, marginHorizontal: 10, marginBottom: 10 }}>{event.eventDescription}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <Text style={{ fontSize: 22, fontWeight: 'bold', paddingHorizontal: 20, paddingVertical: 10, paddingTop: 25, color: '#333', borderBottomWidth: 1, borderBottomColor: '#e1e4e8' }}>Your Bookings</Text>
+            <ScrollView style={{ paddingHorizontal: 20, paddingVertical: 10 }}>
+              {bookingData.map((booking, index) => (
+                <Swipeable
+                  key={index}
+                  renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, booking.bookingID)}
+                  friction={2}
+                >
+                  <View style={{ backgroundColor: '#ffffff', padding: 15, borderRadius: 10, borderWidth: 1, borderColor: '#ddd', shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.22, shadowRadius: 2.22, elevation: 3, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginBottom: 4, marginTop: 4 }}>
+                    <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>{booking.date}</Text>
+                    <Text style={{ fontSize: 16, fontWeight: 'bold', marginTop: 5, color: '#555' }}>{booking.companyName}</Text>
+                    <Text style={{ fontSize: 15, fontStyle: 'italic', color: '#555', marginTop: 5 }}>{booking.position}</Text>
+                    <Text style={{ fontSize: 15, color: '#555', marginTop: 5 }}>{booking.time}</Text>
+                    <TouchableOpacity style={{ backgroundColor: '#007BFF', padding: 10, marginTop: 15, borderRadius: 5, alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                      <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>See Booking</Text>
+                    </TouchableOpacity>
+                  </View>
+                </Swipeable>
+              ))}
+            </ScrollView>
+          </SafeAreaView>
+        </GestureHandlerRootView>
+      );
+    
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff", // Ensuring uniform background color
-  },
-  header: {
-    fontSize: 22,
-    fontWeight: "bold",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    paddingTop: 25,
-    // backgroundColor: '#f8f9fa', // Light gray background for headers
-    color: "#333", // Darker text color for better readability
-    borderBottomWidth: 1,
-    borderBottomColor: "#e1e4e8", // Subtle separation
-  },
-  horizontalScroll: {
-    height: 350,
-    marginTop: 5, // Give some space from the header
-  },
-  scrollViewContainer: {
-    paddingStart: 10,
-    paddingEnd: 10,
-  },
-  box: {
-    width: 200,
-    height: 260,
-    backgroundColor: "#ffffff", // White background for the cards
-    margin: 10,
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    container: {
+        flex: 1,
+        backgroundColor: '#fff', // Ensuring uniform background color
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5, // Elevation for shadow on Android
-  },
-  eventName: {
-    color: "#333",
-    fontSize: 16,
-    fontWeight: "bold",
-    margin: 10, // Added margin for better text alignment
-  },
-  eventDescription: {
-    color: "#666",
-    fontSize: 14,
-    marginHorizontal: 10, // Horizontal margin for alignment
-    marginBottom: 10,
-  },
-  image: {
-    width: "100%",
-    height: 120,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8, // Rounded corners on top only
-  },
-  bookingScrollView: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  bookingBox: {
-    backgroundColor: "#ffffff",
-    padding: 15,
-    marginVertical: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#ddd", // Subtle border color
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
+    header: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        paddingTop: 25,
+        // backgroundColor: '#f8f9fa', // Light gray background for headers
+        color: '#333', // Darker text color for better readability
+        borderBottomWidth: 1,
+        borderBottomColor: '#e1e4e8', // Subtle separation
     },
-    shadowOpacity: 0.22,
-    shadowRadius: 2.22,
-    elevation: 3, // Elevation for shadow on Android
-  },
-  bookingDate: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  bookingCompanyName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginTop: 5,
-    color: "#555", // Slightly lighter than the date text
-  },
-  bookingPosition: {
-    fontSize: 15,
-    fontStyle: "italic",
-    color: "#555",
-    marginTop: 5,
-  },
-  bookingTime: {
-    fontSize: 15,
-    color: "#555",
-    marginTop: 5,
-  },
-  createButton: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#007BFF", // Bootstrap primary blue
-  },
+    horizontalScroll: {
+        height: 350,
+        marginTop: 5, // Give some space from the header
+    },
+    scrollViewContainer: {
+        paddingStart: 10,
+        paddingEnd: 10,
+    },
+    box: {
+        width: 200,
+        height: 240,
+        backgroundColor: '#ffffff', // White background for the cards
+        margin: 10,
+        borderRadius: 8,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5, // Elevation for shadow on Android
+    },
+    eventName: {
+        color: '#333',
+        fontSize: 16,
+        fontWeight: 'bold',
+        margin: 10, // Added margin for better text alignment
+    },
+    eventDescription: {
+        color: '#666',
+        fontSize: 14,
+        marginHorizontal: 10, // Horizontal margin for alignment
+        marginBottom: 10,
+    },
+    image: {
+        width: '100%',
+        height: 120,
+        borderTopLeftRadius: 8,
+        borderTopRightRadius: 8, // Rounded corners on top only
+    },
+    bookingScrollView: {
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+    },
+    bookingBox: {
+        backgroundColor: '#ffffff',
+        padding: 15,
+        // marginVertical: 8,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#ddd', // Subtle border color
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.22,
+        shadowRadius: 2.22,
+        elevation: 3, // Elevation for shadow on Android
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start', // Aligns children elements to the left
+        marginBottom: 4,
+        marginTop: 4,
+    },
+    bookingDate: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    bookingCompanyName: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginTop: 5,
+        color: '#555', // Slightly lighter than the date text
+    },
+    bookingPosition: {
+        fontSize: 15,
+        fontStyle: 'italic',
+        color: '#555',
+        marginTop: 5,
+    },
+    bookingTime: {
+        fontSize: 15,
+        color: '#555',
+        marginTop: 5,
+    },
+    createButton: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#007BFF', // Bootstrap primary blue
+    },
+    deleteContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+    },
+    deleteButton: {
+        backgroundColor: 'red',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: 100,
+        
+        height: '95%',
+        borderRadius: 8,
+        marginLeft: 20,
+        
+    },
+    bookingButton: {
+        backgroundColor: '#007BFF', // Sets the button color to blue
+        padding: 10,
+        marginTop: 15,
+        borderRadius: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%', // Ensures the button stretches to fill its container
+    },
+    buttonText: {
+        color: 'white', // Ensures text is white for better contrast on the blue background
+        fontSize: 16,
+        fontWeight: 'bold',
+    }
 });
