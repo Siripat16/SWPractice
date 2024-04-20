@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     },
     box: {
         width: 200,
-        height: 240,
+        height: 250,
         backgroundColor: '#ffffff', // White background for the cards
         margin: 10,
         borderRadius: 8,
