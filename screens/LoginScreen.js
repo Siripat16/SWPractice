@@ -1,5 +1,4 @@
-//Siripat Sirikul
-import React from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,30 +7,106 @@ import {
   TouchableOpacity,
   ScrollView,
   KeyboardAvoidingView,
-  Image,
   Platform,
-} from "react-native";
+  Alert,
+} from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function LoginScreen({ route }) {
-  const { userRole } = route.params;
+export default function LoginScreen({ navigation }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  // Storing the token
+  const storeToken = async (token) => {
+    try {
+      await AsyncStorage.setItem('userToken', token);
+    } catch (error) {
+      console.error('Error saving the token', error);
+    }
+  };
+
+  // Handle form submission for login
+  const handleLogin = async () => {
+    const loginURL = 'http://127.0.0.1:2000/api/v1/auth/login';
+    const payload = {
+      emailAddress: email,
+      password: password
+    };
+  
+    try {
+      const loginResponse = await axios.post(loginURL, payload);
+      // console.log(loginResponse.data); // Log the response data
+  
+      // Check if login was successful
+      if (loginResponse.data.success && loginResponse.data.token) {
+        await AsyncStorage.setItem('userToken', loginResponse.data.token); // Store the token
+        fetchUserRole(); // Now fetch user role after storing the token
+      }
+    } catch (error) {
+      console.error("Login failed:", error.response ? error.response.data : error);
+      Alert.alert(
+        "Login Failed",
+        error.response?.data?.message || "An error occurred during login"
+      );
+    }
+  };
+  
+
+  const fetchUserRole = async () => {
+    const userURL = 'http://127.0.0.1:2000/api/v1/auth/getLoggedInUser/';
+    try {
+      const token = await AsyncStorage.getItem('userToken'); // Retrieve the stored token
+      const userResponse = await axios.get(userURL, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (userResponse.data.success) {
+        const { role, _id } = userResponse.data.data;
+  
+        // Store role and ID in AsyncStorage
+        await AsyncStorage.setItem('userRole', role);
+        await AsyncStorage.setItem('userID', _id);
+
+        // Verification step: Check what has just been stored
+        // console.log("Stored Role:", await AsyncStorage.getItem('userRole'));
+        // console.log("Stored ID:", await AsyncStorage.getItem('userID'));
+
+        // Navigate to Dashboard with role and ID as parameters if needed
+        navigation.navigate('Dashboard');
+      } else {
+        throw new Error("Failed to fetch user role");
+      }
+    } catch (error) {
+      console.error("Fetching user role failed:", error);
+      Alert.alert(
+        "Error",
+        "Unable to fetch user details after login."
+      );
+    }
+  };
+  
+  
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }} // Take the full height of the screen
-      behavior={Platform.OS === "ios" ? "padding" : "height"} // Adjust behavior based on platform
-      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0} // Optional offset setting
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
     >
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled">
         <Text style={styles.headerText}>Login</Text>
-        <Image source={require("../assets/job-fair.png")} style={styles.logo} />
         <Text style={styles.label}>Email</Text>
         <TextInput
           placeholder="Email"
           style={styles.input}
           keyboardType="email-address"
           autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
         />
         <Text style={styles.label}>Password</Text>
         <TextInput
@@ -39,24 +114,20 @@ export default function LoginScreen({ route }) {
           style={styles.input}
           secureTextEntry
           autoCapitalize="none"
+          value={password}
+          onChangeText={setPassword}
         />
-        <TouchableOpacity
-          onPress={() => {
-            /* Handle forgot password here */
-          }}>
+        <TouchableOpacity onPress={() => { /* Handle forgot password here */ }}>
           <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
         <Text>
-          Don't have account?{" "}
+          Don't have an account?{" "}
           <Text
-            onPress={() => {
-              /* Handle navigation to SignUp here */
-            }}
+            onPress={() => navigation.navigate("SignUp")}
             style={styles.linkText}>
-            <Text>{userRole}</Text>
             create a new account
           </Text>
         </Text>
@@ -69,17 +140,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-
-    padding: 20, // Added padding
+    padding: 20,
   },
   headerText: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 30, // Increase the bottom margin for header
-  },
-  logo: {
-    width: 200, // Adjust the size as per your image
-    height: 200, // Adjust the size as per your image
     marginBottom: 30,
   },
   input: {
@@ -104,11 +169,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   forgotPasswordText: {
-    color: "#0000ff", // Blue color for the link
-    marginTop: 10, // Spacing above the link
+    color: "#0000ff",
+    marginTop: 10,
   },
   linkText: {
-    color: "#0000ff", // Blue color for the link
+    color: "#0000ff",
     fontWeight: "bold",
   },
   label: {
