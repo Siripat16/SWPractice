@@ -15,7 +15,11 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryAddUsageDescription": "This app requires access to the photo library to save files.",
+        "NSPhotoLibraryUsageDescription": "This app requires access to the photo library to open files."
+      }
     },
     "android": {
       "adaptiveIcon": {
