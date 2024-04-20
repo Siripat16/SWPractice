@@ -9,13 +9,14 @@ import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 import UserProfileScreen from "./screens/UserProfileScreen";
 import CompanyProfileScreen from "./screens/CompanyProfileScreen";
+import ManageResume from "./screens/ManageResume.js";
 import { Pressable, Text } from "react-native";
-
 const Stack = createNativeStackNavigator();
 const userRole = "admin";
 // const userRole = 'user';
 
 export default function App() {
+  const studentID = '661ff9e5774f23adaf3949cb';
   // const [isModalVisible, setModalVisible] = useState(false);
   return (
     <NavigationContainer>
@@ -97,6 +98,12 @@ export default function App() {
           component={BookingScreen}
           initialParams={{ userRole: userRole }}
           options={{ title: "Booking" }}
+        />
+        <Stack.Screen
+          name="ManageResume"
+          component={ManageResume}
+          initialParams={{ userRole: userRole, studentID: studentID }}
+          options={{ title: "Manage Resume" }}
         />
       </Stack.Navigator>
     </NavigationContainer>
