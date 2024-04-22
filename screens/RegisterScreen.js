@@ -15,7 +15,6 @@ import {
 import axios from "axios"; // Import axios to make HTTP requests
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation hook
 
-
 export default function SignUpScreen({ route }) {
   const { userRole } = route.params;
   const [formData, setFormData] = useState({
@@ -38,36 +37,38 @@ export default function SignUpScreen({ route }) {
       Alert.alert("Passwords do not match");
       return;
     }
-    
+
     // API endpoint
-    const apiURL = 'http://127.0.0.1:2000/api/v1/auth/register';
-  
+    const apiURL = "http://172.20.10.2:8081/api/v1/auth/register";
+
     // Payload, here you can replace static values with form data if needed
     const payload = {
       name: formData.name || "User04", // Replace "User04" with formData.name if the name is supposed to be input by the user
       emailAddress: formData.email || "Usertest03@gmail.com", // Same as above for email
       password: formData.password || "usertest01",
       role: formData.role || "user", // Make sure role is included in your form data or state if it's dynamic
-      telPhone: formData.tel || "0123456788" // And for telephone
+      telPhone: formData.tel || "0123456788", // And for telephone
     };
-  
+
     try {
       const response = await axios.post(apiURL, payload);
       console.log(response.data); // Log the successful response from the server
-  
+
       // Optionally handle the response further, like navigating to another screen
       if (response.data) {
         navigation.navigate("Login"); // Navigate to Login screen on success
       }
     } catch (error) {
-      console.error("Registration failed:", error.response ? error.response.data : error);
+      console.error(
+        "Registration failed:",
+        error.response ? error.response.data : error
+      );
       Alert.alert(
         "Registration failed",
         error.response?.data?.message || "An error occurred"
       );
     }
   };
-  
 
   return (
     <KeyboardAvoidingView
