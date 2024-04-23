@@ -1,7 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect} from 'react';
 import { View, Text, Image, Button, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function CompanyProfileScreen({ navigation }) {
+    const [userDetails, setUserDetails] = useState({
+        userRole: '',
+        userID: '',
+        token: ''
+    });
+
+    useEffect(() => {
+        const fetchUserDetails = async () => {
+            try {
+                const storedUserRole = await AsyncStorage.getItem('userRole');
+                const storedUserID = await AsyncStorage.getItem('userID');
+                const storedToken = await AsyncStorage.getItem('userToken');
+                // console.log("Stored Role:", await AsyncStorage.getItem('userRole'));
+                // console.log("Stored ID:", await AsyncStorage.getItem('userID'));
+                setUserDetails({
+                    userRole: storedUserRole,
+                    userID: storedUserID,
+                    token: storedToken
+                });
+                
+            } catch (error) {
+                console.error("Error retrieving user details from AsyncStorage:", error);
+            }
+        };
+
+        fetchUserDetails();
+    }, []);
     const [companyProfile, setCompanyProfile] = useState({
         logoUrl: "https://images.unsplash.com/photo-1529612700005-e35377bf1415?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
         name: "Tech Innovations Inc.",
@@ -15,10 +44,38 @@ export default function CompanyProfileScreen({ navigation }) {
         setEditable(!editable);
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         console.log('Logout button tapped');
-        navigation.navigate('Home');
+    
+        try {
+            const response = await axios.get('http://127.0.0.1:2000/api/v1/auth/logout', {
+                headers: {
+                    'Authorization': `Bearer ${userDetails.token}`
+                }
+            });
+    
+            if (response.data && response.data.success) {
+                console.log('Logout successful');
+    
+                // Clear user details from state and AsyncStorage
+                setUserDetails({
+                    userRole: '',
+                    userID: '',
+                    token: ''
+                });
+    
+                await AsyncStorage.multiRemove(['userRole', 'userID', 'userToken']);
+    
+                // Navigate to the home screen
+                navigation.navigate('Home');
+            } else {
+                console.error('Logout failed with response:', response.data);
+            }
+        } catch (error) {
+            console.error('Logout failed:', error.response ? error.response.data : error.message);
+        }
     };
+    
 
     return (
         <ScrollView contentContainerStyle={styles.container}>

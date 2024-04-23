@@ -9,7 +9,6 @@ import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 import UserProfileScreen from "./screens/UserProfileScreen";
 import CompanyProfileScreen from "./screens/CompanyProfileScreen";
-import ManageResume from "./screens/ManageResume.js";
 import { Pressable, Text } from "react-native";
 const Stack = createNativeStackNavigator();
 const userRole = "admin";
@@ -85,7 +84,22 @@ export default function App() {
           name="Dashboard"
           component={DashboardScreen}
           initialParams={{ userRole: userRole }}
-          options={{ title: "Dashboard" }}
+          options={({ navigation }) => ({
+            title: "Dashboard",
+            headerTitleStyle: {
+              fontWeight: "bold",
+            },
+            headerRight: () => (
+              <Pressable
+                onPress={() => {
+                  const targetScreen =
+                    userRole === "admin" ? "CompanyProfile" : "UserProfile";
+                  navigation.navigate(targetScreen, { userRole });
+                }}>
+                <Text style={{ color: "#fff", fontSize: 16 }}>Profile</Text>
+              </Pressable>
+            ),
+          })}
         />
         <Stack.Screen
           name="Event"
@@ -98,12 +112,6 @@ export default function App() {
           component={BookingScreen}
           initialParams={{ userRole: userRole }}
           options={{ title: "Booking" }}
-        />
-        <Stack.Screen
-          name="ManageResume"
-          component={ManageResume}
-          initialParams={{ userRole: userRole, studentID: studentID }}
-          options={{ title: "Manage Resume" }}
         />
       </Stack.Navigator>
     </NavigationContainer>
