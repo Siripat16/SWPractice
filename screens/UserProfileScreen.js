@@ -137,13 +137,16 @@ export default function UserProfileScreen({ navigation }) {
                 <View style={styles.header}>
                     <Text style={styles.title}>User Profile</Text>
                 </View>
+                
+                {editing ? (
                 <TouchableOpacity onPress={pickImage} style={styles.profileImageContainer}>
-                    {imageUri ? (
-                        <Image source={{ uri: imageUri }} style={styles.profileImage} />
-                    ) : (
-                        <Image source={{ uri: userProfile?.profilePicture }} style={styles.profileImage} />
-                    )}
+                    <Image source={imageUri ? { uri: imageUri } : { uri: userProfile?.profilePicture }} style={styles.profileImage} />
                 </TouchableOpacity>
+            ) : (
+                <View style={styles.profileImageContainer}>
+                    <Image source={{ uri: userProfile?.profilePicture || imageUri }} style={styles.profileImage} />
+                </View>
+            )}
                 {!editing && (
                     <TouchableOpacity onPress={() => setEditing(true)} style={styles.editButton}>
                         <Text style={styles.editButtonText}>Edit Profile</Text>
