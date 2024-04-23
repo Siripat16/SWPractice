@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Image, TextInput, StyleSheet, Alert } fro
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ScrollView, GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function UserProfileScreen({ navigation }) {
     const studentID = '6627f6a38aa54820960b636e';
@@ -12,12 +13,13 @@ export default function UserProfileScreen({ navigation }) {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
+    const [resume, setResume] = useState('');
     const userID = '6627f6a38aa54820960b636e';
 
     useEffect(() => {
         requestMediaLibraryPermissions();
         fetchUserProfile(userID);
-    }, []);
+    }, [userID]);
 
     async function requestMediaLibraryPermissions() {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -30,21 +32,30 @@ export default function UserProfileScreen({ navigation }) {
         try {
             const url = `http://127.0.0.1:2000/api/v1/auth/user/${userID}`;
             const response = await axios.get(url);
+
             if (response.data.success && response.data.data) {
                 const profileData = response.data.data;
+
                 const imageUri = profileData.picture ? `data:image/jpeg;base64,${profileData.picture}` : null;
 
                 setUserProfile({
                     name: profileData.name,
                     email: profileData.emailAddress,
                     phoneNumber: profileData.telPhone,
-                    profilePicture: imageUri
+                    profilePicture: imageUri,
+                    resume: profileData.resume,
                 });
 
-                // Initialize name, email, and phone number state with fetched data
                 setName(profileData.name);
                 setEmail(profileData.emailAddress);
                 setPhoneNumber(profileData.telPhone);
+                setResume(profileData.resume);
+
+                // Format the resume text
+                const formattedResume = profileData.resume.replace(/\\n/g, '\n');
+                setResume(formattedResume);
+            } else {
+                console.error('No user data found:', response.data);
             }
         } catch (error) {
             console.error('Failed to fetch user profile:', error);
@@ -53,18 +64,17 @@ export default function UserProfileScreen({ navigation }) {
 
     async function uploadImage() {
         if (!imageUri) {
-            // Alert.alert('No Image Selected', 'Please select an image first!');
             return;
         }
 
         const formData = new FormData();
         let filename = imageUri.split('/').pop();
         let match = /\.(\w+)$/.exec(filename);
-        let type = match ? `image/${match[1]}` : 'image/jpeg'; 
+        let type = match ? `image/${match[1]}` : 'image/jpeg';
 
         formData.append('file', {
             uri: imageUri,
-            type: type, 
+            type: type,
             name: filename || 'upload.jpg'
         });
 
@@ -77,9 +87,6 @@ export default function UserProfileScreen({ navigation }) {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-
-            // Alert.alert('Upload Successful', 'Image uploaded successfully!');
-            // console.log(response.data);
         } catch (error) {
             console.error("Error uploading image: ", error);
             Alert.alert('Upload Failed', 'Failed to upload image.');
@@ -87,27 +94,27 @@ export default function UserProfileScreen({ navigation }) {
     }
 
     async function saveProfile() {
-      try {
-          const url = `http://127.0.0.1:2000/api/v1/auth/user/${studentID}`;
-          const response = await axios.put(url, {
-              name,
-              emailAddress: email,      // Corrected from 'email' to 'emailAddress'
-              telPhone: phoneNumber     // Corrected from 'phoneNumber' to 'telPhone'
-          });
-  
-          if (response.data.success) {
-              fetchUserProfile(studentID);
-              setEditing(false); // Exit editing mode after successful update
-              Alert.alert('Profile Updated', 'Your profile has been successfully updated.');
-          } else {
-              Alert.alert('Update Failed', 'Failed to update profile. Please try again.');
-          }
-      } catch (error) {
-          console.error('Error updating profile:', error);
-          Alert.alert('Update Failed', 'Failed to update profile. Please try again.');
-      }
-  }
-  
+        try {
+            const url = `http://127.0.0.1:2000/api/v1/auth/user/${studentID}`;
+            const response = await axios.put(url, {
+                name,
+                emailAddress: email,
+                telPhone: phoneNumber,
+                resume: resume
+            });
+
+            if (response.data.success) {
+                fetchUserProfile(studentID);
+                setEditing(false);
+                // Alert.alert('Profile Updated', 'Your profile has been successfully updated.');
+            } else {
+                Alert.alert('Update Failed', 'Failed to update profile. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            Alert.alert('Update Failed', 'Failed to update profile. Please try again.');
+        }
+    }
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -124,6 +131,7 @@ export default function UserProfileScreen({ navigation }) {
     };
 
     return (
+      <GestureHandlerRootView>
         <LinearGradient colors={['#4286f4', '#373B44']} style={styles.container}>
             <View style={styles.contentContainer}>
                 <View style={styles.header}>
@@ -164,6 +172,15 @@ export default function UserProfileScreen({ navigation }) {
                             placeholder="Phone Number"
                             placeholderTextColor="#ccc"
                         />
+                        <TextInput
+                            style={[styles.input, styles.resumeInput]}
+                            value={resume}
+                            onChangeText={setResume}
+                            placeholder="Resume"
+                            placeholderTextColor="#ccc"
+                            multiline={true}
+                            numberOfLines={10} // Set the number of lines visible initially
+                        />
                         <TouchableOpacity onPress={() => {
                             saveProfile();
                             uploadImage();
@@ -173,23 +190,28 @@ export default function UserProfileScreen({ navigation }) {
                         </TouchableOpacity>
                     </View>
                 )}
-                {/* Display user details */}
                 {!editing && (
                     <View style={styles.detailsContainer}>
                         <Text style={styles.detailText}>Name: {userProfile?.name}</Text>
                         <Text style={styles.detailText}>Email: {userProfile?.email}</Text>
                         <Text style={styles.detailText}>Phone Number: {userProfile?.phoneNumber}</Text>
+                        <Text style={styles.detailText}>
+                          Experience
+                        </Text>
+                        <ScrollView style={styles.resumeScrollView}>
+                            <Text style={styles.resumeText}>{resume}</Text>
+                        </ScrollView>
                     </View>
                 )}
             </View>
         </LinearGradient>
+      </GestureHandlerRootView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // justifyContent: 'center',
         paddingTop: 35,
         alignItems: 'center',
     },
@@ -265,4 +287,18 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 10,
     },
+    resumeText: {
+        fontSize: 16,
+        marginBottom: 10,
+        textAlign: 'left', // Align the text to the left
+    },
+    resumeScrollView: {
+      maxHeight: 200, 
+      width: '90%',
+  },
+  resumeInput: {
+    height: 120, // Adjust as needed
+    textAlignVertical: 'top', // Set text alignment to top
+    marginBottom: 10,
+}
 });
