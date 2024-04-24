@@ -98,7 +98,11 @@ export default function LoginScreen({ navigation }) {
         // console.log("Stored ID:", await AsyncStorage.getItem('userID'));
 
         // Navigate to Dashboard with role and ID as parameters if needed
-        navigation.navigate('Dashboard');
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Dashboard' }],
+        });
+        
       } else {
         throw new Error("Failed to fetch user role");
       }
@@ -141,16 +145,13 @@ export default function LoginScreen({ navigation }) {
           value={password}
           onChangeText={setPassword}
         />
-        <TouchableOpacity onPress={() => { /* Handle forgot password here */ }}>
-          <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-        </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
         <Text>
           Don't have an account?{" "}
           <Text
-            onPress={() => navigation.navigate("SignUp")}
+            onPress={() => navigation.navigate("Register")}
             style={styles.linkText}>
             create a new account
           </Text>

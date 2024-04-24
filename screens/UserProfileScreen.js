@@ -4,7 +4,7 @@ import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScrollView, GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useNavigation } from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
 import defaultProfilePic from '../assets/user.png'; // Adjust the path as necessary
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -144,10 +144,19 @@ export default function UserProfileScreen({ navigation, route }) {
                   'Authorization': `Bearer ${token}`
               }
           });
-
+  
           if (response.data.success) {
               await AsyncStorage.multiRemove(['userRole', 'userID', 'userToken']);
-              navigation.navigate('Home');
+              
+              // Reset the navigation stack and navigate to the Login screen
+              navigation.dispatch(
+                  CommonActions.reset({
+                      index: 0,
+                      routes: [
+                          { name: 'Login' }, // Change 'Login' to the name of your login screen as defined in your navigator
+                      ],
+                  })
+              );
           } else {
               console.error('Logout failed with response:', response.data);
           }
@@ -155,6 +164,7 @@ export default function UserProfileScreen({ navigation, route }) {
           console.error('Logout failed:', error.response ? error.response.data : error.message);
       }
   };
+  
 
     return (
       <GestureHandlerRootView>

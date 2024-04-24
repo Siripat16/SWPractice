@@ -17,7 +17,7 @@ import { useNavigation } from "@react-navigation/native"; // Import useNavigatio
 
 
 export default function SignUpScreen({ route }) {
-  const { userRole } = route.params;
+  // const { userRole } = route.params;
   const [formData, setFormData] = useState({
     name: "",
     tel: "",
