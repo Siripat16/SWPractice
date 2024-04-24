@@ -1,13 +1,27 @@
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, SafeAreaView, Image, Button, TouchableOpacity, Alert
+  View, Text, StyleSheet, ScrollView, SafeAreaView, Image, Button, TouchableOpacity, Alert, RefreshControl
 } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 export default function DashboardScreen({ navigation }) {
+    
+    const timeOnlyOptions = {
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true,
+    };
+
+    const dateOnlyOptions = {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+    };
+
     const [userDetails, setUserDetails] = useState({
         userRole: '',
         userID: '',
@@ -42,50 +56,12 @@ export default function DashboardScreen({ navigation }) {
     useEffect(() => {
         fetchUserDetails();
     }, []);
-    console.log(userDetails)
+    // console.log(userDetails)
     // console.log(userDetails.userID);
     // console.log(userDetails.userRole);
 
     const [eventData, setEventData] = useState([]);
 
-    //get all events for user
-    // useEffect(() => {
-    //     const fetchEvents = async () => {
-    //         try {
-    //             const response = await axios.get('http://127.0.0.1:2000/api/v1/events/getEvents');
-    //             setEventData(response.data.data);
-    //         } catch (error) {
-    //             console.error('Error fetching event data:', error);
-    //             Alert.alert('Error', 'Unable to fetch events');
-    //         }
-    //     };
-
-    //     fetchEvents();
-    // }, []);
-
-    //get evetn for company
-    // useEffect(() => {
-    //     const fetchCompanyInfo = async () => {
-    //         // Ensure that userID is available before making the API call
-    //         if (!userDetails.userID) return;
-    
-    //         try {
-    //             const url = `http://127.0.0.1:2000/api/v1/events//users/${userDetails.userID}`;
-    //             const response = await axios.get(url);
-    //             if (response.data && response.data.success) {
-    //                 setEventData(response.data.data);
-    //             } else {
-    //                 console.error('No data found');
-    //                 Alert.alert('Error', 'No company information available');
-    //             }
-    //         } catch (error) {
-    //             console.error('Error fetching company information:', error);
-    //             Alert.alert('Error', 'Unable to fetch company information');
-    //         }
-    //     };
-    
-    //     fetchCompanyInfo();
-    // }, [userDetails.userID]);  // Dependency on userDetails.userID ensures fetch is attempted only after userID is available
     useEffect(() => {
         const fetchEvents = async () => {
             if (!userDetails.userRole || !userDetails.userID) return;
@@ -116,30 +92,36 @@ export default function DashboardScreen({ navigation }) {
         fetchEvents();
     }, [userDetails.userRole, userDetails.userID]);  // Dependency on userDetails ensures fetch is attempted only after these details are available
     
+    const [bookings, setBookings] = useState([]);
+    useEffect(() => {
+        const fetchBookingDetails = async () => {
+            if (!userDetails.userRole || !userDetails.userID) return;
+    
+            let url;
+            if (userDetails.userRole === 'admin') {
+                url = `http://127.0.0.1:2000/api/v1/bookingDetails/getBookingDetailsForAdmin/${userDetails.userID}`;
+            } else {
+                url = `http://127.0.0.1:2000/api/v1/bookingDetails/getBookingDetailsByUser/${userDetails.userID}`;
+            }
+    
+            try {
+                const response = await axios.get(url);
+                if (response.data && response.data.success) {
+                    setBookings(response.data.data);
+                } else {
+                    console.error('No data found');
+                    Alert.alert('Error', 'No booking information available');
+                }
+                // console.log(booking.event);
+            } catch (error) {
+                console.error('Error fetching booking data:', error);
+                Alert.alert('Error', 'Unable to fetch bookings');
+            }
+        };
+    
+        fetchBookingDetails();
+    }, [userDetails.userRole, userDetails.userID]);
 
-    const bookingData = [
-        {
-            bookingID: 'b123456',
-            date: '1 Jan 2024',
-            time: '11:00 AM',
-            companyName: 'Google',
-            position: 'Software Engineer',
-        },
-        {
-            bookingID: 'b123457',
-            date: '2 Jan 2024',
-            time: '10:00 AM',
-            companyName: 'Amazon',
-            position: 'Data Analyst',
-        },
-        {
-            bookingID: 'b123458',
-            date: '3 Jan 2024',
-            time: '9:00 AM',
-            companyName: 'META',
-            position: 'Product Manager',
-        },
-    ];
     const renderRightActions = (progress, dragX, bookingID) => {
         return (
             <View style={styles.deleteContainer}>
@@ -161,10 +143,20 @@ export default function DashboardScreen({ navigation }) {
     const deleteBooking = (bookingID) => {
         console.log(`Booking ${bookingID} deleted`);
     };
-    console.log('user detail',userDetails);
+    // console.log('user detail',userDetails);
+
+    const [refreshing, setRefreshing] = useState(false);
+    const onRefresh = async () => {
+        setRefreshing(true);
+        // Place your data fetching logic here
+        fetchEvents();  // Assuming fetchEvents fetches the latest events data
+        fetchBookingDetails();  // Assuming this fetches the latest booking details
+        setRefreshing(false);
+    };
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <SafeAreaView style={{ flex: 1 }}>
+                
                 {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight:20, paddingTop: 5 }}>
                     <Text style={{ fontSize: 22, fontWeight: 'bold', paddingHorizontal: 20, paddingVertical: 10, paddingTop: 5, color: '#333', borderBottomWidth: 1, borderBottomColor: '#e1e4e8' }}>Your info</Text>
                 </View> */}
@@ -203,9 +195,9 @@ export default function DashboardScreen({ navigation }) {
                     </View> */}
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight:20, paddingTop: 5 }}>
-                    <Text style={{ fontSize: 22, fontWeight: 'bold', paddingHorizontal: 20, paddingVertical: 10, paddingTop: 5, color: '#333', borderBottomWidth: 1, borderBottomColor: '#e1e4e8' }}>For You</Text>
+                    <Text style={{ fontSize: 22, fontWeight: 'bold', paddingHorizontal: 20, paddingVertical: 10, paddingTop: 5, color: '#333', borderBottomWidth: 1, borderBottomColor: '#e1e4e8' }}>Events</Text>
                     {userDetails.userRole === 'admin' && (
-                        <TouchableOpacity onPress={() => navigation.navigate('Booking', { type: 'create' })}>
+                        <TouchableOpacity onPress={() => navigation.navigate('Event', { type: 'create' })}>
                             <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#007BFF' }}>Create</Text>
                         </TouchableOpacity>
                     )}
@@ -228,23 +220,24 @@ export default function DashboardScreen({ navigation }) {
                 </ScrollView>
                 <Text style={styles.header}>Your Bookings</Text>
                 <ScrollView style={styles.bookingScrollView}>
-                    {bookingData.map((booking, index) => (
-                        <Swipeable
-                            key={index}
-                            renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, booking.bookingID)}
-                            friction={2}
-                        >
-                            <View style={styles.bookingBox}>
-                                <Text style={styles.bookingDate}>{booking.date}</Text>
-                                <Text style={styles.bookingCompanyName}>{booking.companyName}</Text>
-                                <Text style={styles.bookingPosition}>{booking.position}</Text>
-                                <Text style={styles.bookingTime}>{booking.time}</Text>
-                                <TouchableOpacity style={styles.bookingButton}>
-                                    <Text style={styles.buttonText} onPress={() => navigation.navigate('Booking', { type: 'See booking' })}>See Booking</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </Swipeable>
-                    ))}
+                {bookings.map((booking, index) => (
+                    <Swipeable
+                        key={index}
+                        renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, booking.booking._id)}
+                    >
+                        <View style={styles.bookingBox}>
+                            <Text style={styles.bookingDate}>{new Date(booking.event.slot.startTime).toLocaleDateString('en-US', dateOnlyOptions)}</Text>
+                            <Text style={styles.bookingCompanyName}>{booking.company.name}</Text>
+                            <Text style={styles.bookingPosition}>{booking.booking.jobPosition}</Text>
+                            <Text style={styles.bookingTime}>
+                                {new Date(booking.event.slot.startTime).toLocaleString('en-US', timeOnlyOptions)}-{new Date(booking.event.slot.endTime).toLocaleString('en-US', timeOnlyOptions)}
+                             </Text>
+                            <TouchableOpacity style={styles.bookingButton}>
+                                <Text style={styles.buttonText} onPress={() => navigation.navigate('Booking', { type: 'See booking', bookingID: booking.booking._id })}>See Booking</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </Swipeable>
+                ))}
                 </ScrollView>
             </SafeAreaView>
         </GestureHandlerRootView>

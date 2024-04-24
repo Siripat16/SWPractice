@@ -52,14 +52,14 @@ function NavigationStack() {
 
   return (
     <Stack.Navigator
-      initialRouteName="Home"
+      initialRouteName="Login"
       screenOptions={{
         headerStyle: { backgroundColor: "#3a568c" },
         headerTintColor: "#fff",
         headerTitleStyle: { fontWeight: "bold" },
         contentStyle: { backgroundColor: "#ffffff" },
       }}>
-      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="Home" component={LoginScreen} />
       <Stack.Screen name="Dashboard" component={DashboardScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />

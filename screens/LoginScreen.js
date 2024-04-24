@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -18,13 +18,35 @@ export default function LoginScreen({ navigation }) {
   const [password, setPassword] = useState('');
 
   // Storing the token
-  const storeToken = async (token) => {
-    try {
-      await AsyncStorage.setItem('userToken', token);
-    } catch (error) {
-      console.error('Error saving the token', error);
-    }
-  };
+  // const storeToken = async (token) => {
+  //   try {
+  //     await AsyncStorage.setItem('userToken', token);
+  //   } catch (error) {
+  //     console.error('Error saving the token', error);
+  //   }
+  // };
+
+//   const handleLogout = async () => {
+//     try {
+//         const response = await axios.get('http://127.0.0.1:2000/api/v1/auth/logout', {
+//             headers: {
+//                 'Authorization': `Bearer ${userDetails.token}`
+//             }
+//         });
+
+//         if (response.data.success) {
+//             await AsyncStorage.multiRemove(['userRole', 'userID', 'userToken']);
+//             navigation.navigate('Home');
+//         } else {
+//             console.error('Logout failed with response:', response.data);
+//         }
+//     } catch (error) {
+//         console.error('Logout failed:', error.response ? error.response.data : error.message);
+//     }
+// };
+// useEffect(() => {
+//   handleLogout();
+// }, []);
 
   // Handle form submission for login
   const handleLogin = async () => {
