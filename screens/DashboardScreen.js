@@ -204,7 +204,7 @@ export default function DashboardScreen({ navigation }) {
                 </View>
                 <ScrollView
                     horizontal={true}
-                    style={{ height: 300, marginTop: 5 }}
+                    style={{ height: 230, marginTop: 5 }}
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ paddingStart: 10, paddingEnd: 10 }}
                 >
@@ -232,9 +232,9 @@ export default function DashboardScreen({ navigation }) {
                             <Text style={styles.bookingTime}>
                                 {new Date(booking.event.slot.startTime).toLocaleString('en-US', timeOnlyOptions)}-{new Date(booking.event.slot.endTime).toLocaleString('en-US', timeOnlyOptions)}
                              </Text>
-                            <TouchableOpacity style={styles.bookingButton}>
+                            {/* <TouchableOpacity style={styles.bookingButton}>
                                 <Text style={styles.buttonText} onPress={() => navigation.navigate('Booking', { type: 'See booking', bookingID: booking.booking._id })}>See Booking</Text>
-                            </TouchableOpacity>
+                            </TouchableOpacity> */}
                         </View>
                     </Swipeable>
                 ))}
