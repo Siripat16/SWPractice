@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, TextInput, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Button, TextInput, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScrollView, GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useNavigation } from '@react-navigation/native';
+import defaultProfilePic from '../assets/user.png'; // Adjust the path as necessary
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function UserProfileScreen({ navigation }) {
-    const studentID = '6627f6a38aa54820960b636e';
+export default function UserProfileScreen({ navigation, route }) {
+    
+    const { userID, token } = route.params;
+    const studentID = userID;
     const [imageUri, setImageUri] = useState(null);
     const [userProfile, setUserProfile] = useState(null);
     const [editing, setEditing] = useState(false);
@@ -14,7 +19,9 @@ export default function UserProfileScreen({ navigation }) {
     const [email, setEmail] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [resume, setResume] = useState('');
-    const userID = '6627f6a38aa54820960b636e';
+    // const userID = '6627f6a38aa54820960b636e';
+    // const navigation = useNavigation();
+
 
     useEffect(() => {
         requestMediaLibraryPermissions();
@@ -130,6 +137,25 @@ export default function UserProfileScreen({ navigation }) {
         }
     };
 
+    const handleLogout = async () => {
+      try {
+          const response = await axios.get('http://127.0.0.1:2000/api/v1/auth/logout', {
+              headers: {
+                  'Authorization': `Bearer ${token}`
+              }
+          });
+
+          if (response.data.success) {
+              await AsyncStorage.multiRemove(['userRole', 'userID', 'userToken']);
+              navigation.navigate('Home');
+          } else {
+              console.error('Logout failed with response:', response.data);
+          }
+      } catch (error) {
+          console.error('Logout failed:', error.response ? error.response.data : error.message);
+      }
+  };
+
     return (
       <GestureHandlerRootView>
         <LinearGradient colors={['#4286f4', '#373B44']} style={styles.container}>
@@ -139,14 +165,14 @@ export default function UserProfileScreen({ navigation }) {
                 </View>
                 
                 {editing ? (
-                <TouchableOpacity onPress={pickImage} style={styles.profileImageContainer}>
-                    <Image source={imageUri ? { uri: imageUri } : { uri: userProfile?.profilePicture }} style={styles.profileImage} />
-                </TouchableOpacity>
-            ) : (
-                <View style={styles.profileImageContainer}>
-                    <Image source={{ uri: userProfile?.profilePicture || imageUri }} style={styles.profileImage} />
-                </View>
-            )}
+                    <TouchableOpacity onPress={pickImage} style={styles.profileImageContainer}>
+                        <Image source={imageUri ? { uri: imageUri } : (userProfile?.profilePicture ? { uri: userProfile.profilePicture } : defaultProfilePic)} style={styles.profileImage} />
+                    </TouchableOpacity>
+                ) : (
+                    <View style={styles.profileImageContainer}>
+                        <Image source={(userProfile?.profilePicture || imageUri) ? { uri: userProfile?.profilePicture || imageUri } : defaultProfilePic} style={styles.profileImage} />
+                    </View>
+                )}
                 {!editing && (
                     <TouchableOpacity onPress={() => setEditing(true)} style={styles.editButton}>
                         <Text style={styles.editButtonText}>Edit Profile</Text>
@@ -206,6 +232,9 @@ export default function UserProfileScreen({ navigation }) {
                         </ScrollView>
                     </View>
                 )}
+            </View>
+            <View style={styles.logoutButton}>
+                <Button title="Logout" onPress={handleLogout} color="#D9534F" />
             </View>
         </LinearGradient>
       </GestureHandlerRootView>
@@ -303,5 +332,11 @@ const styles = StyleSheet.create({
     height: 120, // Adjust as needed
     textAlignVertical: 'top', // Set text alignment to top
     marginBottom: 10,
+},
+logoutButton: {
+  position: 'absolute',
+  bottom: 50,
+  alignSelf: 'center',
+  width: '80%'
 }
 });

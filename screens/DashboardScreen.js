@@ -11,30 +11,38 @@ export default function DashboardScreen({ navigation }) {
     const [userDetails, setUserDetails] = useState({
         userRole: '',
         userID: '',
-        token: ''
+        token: '',
+        userName: '',
+        email: '',
+        tel: ''
     });
-
+    const fetchUserDetails = async () => {
+        try {
+            const storedUserRole = await AsyncStorage.getItem('userRole');
+            const storedUserID = await AsyncStorage.getItem('userID');
+            const storedToken = await AsyncStorage.getItem('userToken');
+            const storedUserNAme = await AsyncStorage.getItem('userName');
+            const storedUserEmail = await AsyncStorage.getItem('userEmail');
+            const storedUserTelPhone = await AsyncStorage.getItem('userTelPhone');
+            // console.log("Stored Role:", await AsyncStorage.getItem('userRole'));
+            // console.log("Stored ID:", await AsyncStorage.getItem('userID'));
+            setUserDetails({
+                userRole: storedUserRole,
+                userID: storedUserID,
+                userName: storedUserNAme,
+                token: storedToken,
+                email: storedUserEmail,
+                telPhone: storedUserTelPhone
+            });
+            
+        } catch (error) {
+            console.error("Error retrieving user details from AsyncStorage:", error);
+        }
+    };
     useEffect(() => {
-        const fetchUserDetails = async () => {
-            try {
-                const storedUserRole = await AsyncStorage.getItem('userRole');
-                const storedUserID = await AsyncStorage.getItem('userID');
-                const storedToken = await AsyncStorage.getItem('userToken');
-                // console.log("Stored Role:", await AsyncStorage.getItem('userRole'));
-                // console.log("Stored ID:", await AsyncStorage.getItem('userID'));
-                setUserDetails({
-                    userRole: storedUserRole,
-                    userID: storedUserID,
-                    token: storedToken
-                });
-                
-            } catch (error) {
-                console.error("Error retrieving user details from AsyncStorage:", error);
-            }
-        };
-
         fetchUserDetails();
     }, []);
+    console.log(userDetails)
     // console.log(userDetails.userID);
     // console.log(userDetails.userRole);
 
@@ -98,12 +106,49 @@ export default function DashboardScreen({ navigation }) {
     const deleteBooking = (bookingID) => {
         console.log(`Booking ${bookingID} deleted`);
     };
-
+    console.log('user detail',userDetails);
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <SafeAreaView style={{ flex: 1 }}>
+                {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight:20, paddingTop: 5 }}>
+                    <Text style={{ fontSize: 22, fontWeight: 'bold', paddingHorizontal: 20, paddingVertical: 10, paddingTop: 5, color: '#333', borderBottomWidth: 1, borderBottomColor: '#e1e4e8' }}>Your info</Text>
+                </View> */}
+                <View style={styles.profileContainer}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                    <Text style={styles.profileHeader}>Profile</Text>
+                    <Button 
+                        title="See more" 
+                        onPress={() => {
+                            // Check the user role and navigate accordingly
+                            const targetScreen = userDetails.userRole === 'admin' ? 'CompanyProfile' : 'UserProfile';
+                            navigation.navigate(targetScreen, { userID: userDetails.userID, token: userDetails.token });
+                        }} 
+                    />
+                </View>
+
+                    <View style={styles.profileInfo}>
+                        <Text style={styles.profileLabel}>Name:</Text>
+                        <Text style={styles.profileValue}>{userDetails.userName}</Text>
+                    </View>
+                    <View style={styles.profileInfo}>
+                        <Text style={styles.profileLabel}>Email:</Text>
+                        <Text style={styles.profileValue}>{userDetails.email}</Text>
+                    </View>
+                    <View style={styles.profileInfo}>
+                        <Text style={styles.profileLabel}>Tel:</Text>
+                        <Text style={styles.profileValue}>{userDetails.telPhone}</Text>
+                    </View>
+                    {/* <View style={styles.profileInfo}>
+                        <Text style={styles.profileLabel}>Name:</Text>
+                        <Text style={styles.profileValue}>{userDetails.userName}</Text>
+                    </View> */}
+                    {/* <View style={styles.profileInfo}>
+                        <Text style={styles.profileLabel}>Role:</Text>
+                        <Text style={styles.profileValue}>{userDetails.userRole}</Text>
+                    </View> */}
+                </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight:20, paddingTop: 5 }}>
-                    <Text style={{ fontSize: 22, fontWeight: 'bold', paddingHorizontal: 20, paddingVertical: 10, paddingTop: 25, color: '#333', borderBottomWidth: 1, borderBottomColor: '#e1e4e8' }}>For You</Text>
+                    <Text style={{ fontSize: 22, fontWeight: 'bold', paddingHorizontal: 20, paddingVertical: 10, paddingTop: 5, color: '#333', borderBottomWidth: 1, borderBottomColor: '#e1e4e8' }}>For You</Text>
                     {userDetails.userRole === 'admin' && (
                         <TouchableOpacity onPress={() => navigation.navigate('Booking', { type: 'create' })}>
                             <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#007BFF' }}>Create</Text>
@@ -112,14 +157,14 @@ export default function DashboardScreen({ navigation }) {
                 </View>
                 <ScrollView
                     horizontal={true}
-                    style={{ height: 380, marginTop: 5 }}
+                    style={{ height: 300, marginTop: 5 }}
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ paddingStart: 10, paddingEnd: 10 }}
                 >
                     {eventData.map((event, index) => (
                         <TouchableOpacity key={index} onPress={() => navigation.navigate('Booking', { eventID: event._id, type: 'event' })}>
                             <View style={styles.box}>
-                                <Image source={{ uri: 'https://example.com/path/to/image.png' }} style={styles.image} />
+                                {/* <Image source={{ uri: 'https://example.com/path/to/image.png' }} style={styles.image} /> */}
                                 <Text style={styles.eventName}>{event.eventTitle}</Text>
                                 <Text style={styles.eventDescription}>{event.eventDescription}</Text>
                             </View>
@@ -162,7 +207,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         paddingHorizontal: 20,
         paddingVertical: 10,
-        paddingTop: 25,
+        paddingTop: 0,
         // backgroundColor: '#f8f9fa', // Light gray background for headers
         color: '#333', // Darker text color for better readability
         borderBottomWidth: 1,
@@ -178,7 +223,7 @@ const styles = StyleSheet.create({
     },
     box: {
         width: 200,
-        height: 250,
+        height: 150,
         backgroundColor: '#ffffff', // White background for the cards
         margin: 10,
         borderRadius: 8,
@@ -289,5 +334,38 @@ const styles = StyleSheet.create({
         color: 'white', // Ensures text is white for better contrast on the blue background
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    profileContainer: {
+        backgroundColor: '#f7f7f7', // Light grey background
+        padding: 20, // Padding for spacing inside the container
+        borderRadius: 10, // Rounded corners
+        shadowColor: "#000", // Shadow for 3D effect
+        shadowOffset: { width: 0, height: 1 }, // Shadow placement
+        shadowOpacity: 0.22, // Shadow opacity
+        shadowRadius: 2.22, // Shadow blur radius
+        elevation: 3, // Elevation for Android (shadow)
+        marginHorizontal: 20, // Horizontal margins
+        marginTop: 20, // Top margin
+        marginBottom: 10, // Bottom margin to separate from next sections
+    },
+    profileHeader: {
+        fontSize: 24, // Larger font size for headers
+        fontWeight: 'bold', // Bold font weight
+        color: '#333', // Dark grey for text color
+        marginBottom: 10, // Margin below the header for spacing
+    },
+    profileInfo: {
+        flexDirection: 'row', // Layout children in a row
+        justifyContent: 'space-between', // Space between items
+        marginBottom: 5, // Margin below each row
+    },
+    profileLabel: {
+        fontSize: 16, // Font size for labels
+        color: '#666', // Medium grey for label text
+        fontWeight: 'bold', // Bold font weight for labels
+    },
+    profileValue: {
+        fontSize: 16, // Font size for values
+        color: '#333', // Darker text for emphasis on content
     }
 });

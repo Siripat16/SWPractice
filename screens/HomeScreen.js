@@ -6,10 +6,10 @@ import { View, Text, StyleSheet, Button } from "react-native";
 export default function HomeScreen({ navigation, route }) {
     //Navigation hook
     // const navigation = useNavigation()
-    const { userRole } = route.params;
+    // const { userRole } = route.params;
     return (
         <View style={styles.container}>
-            <Text>User Role: {userRole} </Text>
+            {/* <Text>User Role: {userRole} </Text> */}
             <Text style={styles.text}>Home Screen</Text>
             <Button 
                 title="Go to Dashboard" 

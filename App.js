@@ -1,119 +1,80 @@
-import * as React from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import * as React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Pressable, Text, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
+
+// Import your screens here...
 import HomeScreen from "./screens/HomeScreen";
 import DashboardScreen from "./screens/DashboardScreen";
-import EventScreen from "./screens/EventScreen";
-import BookingScreen from "./screens/BookingScreen";
 import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 import UserProfileScreen from "./screens/UserProfileScreen";
 import CompanyProfileScreen from "./screens/CompanyProfileScreen";
-import { Pressable, Text } from "react-native";
+import EventScreen from "./screens/EventScreen";
+import BookingScreen from "./screens/BookingScreen";
+
 const Stack = createNativeStackNavigator();
-const userRole = "admin";
-// const userRole = 'user';
+
+function NavigationStack() {
+  const [userDetails, setUserDetails] = React.useState({ userRole: '', userID: '', token: '' });
+  const navigation = useNavigation();
+
+  const fetchUserRole = async () => {
+    const userURL = 'http://127.0.0.1:2000/api/v1/auth/getLoggedInUser/';
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      const userResponse = await axios.get(userURL, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (userResponse.data.success) {
+        const { role, _id } = userResponse.data.data;
+        setUserDetails({
+          userRole: role,
+          userID: _id,
+        });
+      } else {
+        throw new Error("Failed to fetch user role");
+      }
+    } catch (error) {
+      console.error("Fetching user role failed:", error);
+      Alert.alert("Error", "Unable to fetch user details after login.");
+    }
+  };
+
+  React.useEffect(() => {
+    fetchUserRole();
+  }, []);
+
+  return (
+    <Stack.Navigator
+      initialRouteName="Home"
+      screenOptions={{
+        headerStyle: { backgroundColor: "#3a568c" },
+        headerTintColor: "#fff",
+        headerTitleStyle: { fontWeight: "bold" },
+        contentStyle: { backgroundColor: "#ffffff" },
+      }}>
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="Dashboard" component={DashboardScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen name="UserProfile" component={UserProfileScreen} />
+      <Stack.Screen name="CompanyProfile" component={CompanyProfileScreen} />
+      <Stack.Screen name="Event" component={EventScreen} />
+      <Stack.Screen name="Booking" component={BookingScreen} />
+    </Stack.Navigator>
+  );
+}
 
 export default function App() {
-  const studentID = '661ff9e5774f23adaf3949cb';
-  // const [isModalVisible, setModalVisible] = useState(false);
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="Home"
-        screenOptions={{
-          title: "Dashboard",
-          headerStyle: {
-            backgroundColor: "#3a568c",
-          },
-          headerTintColor: "#fff",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-          contentStyle: {
-            backgroundColor: "#ffffff",
-          },
-        }}>
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          initialParams={{ userRole: userRole }}
-          options={({ navigation }) => ({
-            title: "Home",
-            headerTitleStyle: {
-              fontWeight: "bold",
-            },
-            headerRight: () => (
-              <Pressable
-                onPress={() => {
-                  const targetScreen =
-                    userRole === "admin" ? "CompanyProfile" : "UserProfile";
-                  navigation.navigate(targetScreen, { userRole });
-                }}>
-                <Text style={{ color: "#fff", fontSize: 16 }}>Profile</Text>
-              </Pressable>
-            ),
-          })}
-        />
-        {/* Add initialParams to each screen similarly */}
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          initialParams={{ userRole: userRole }}
-          options={{ title: "Login" }}
-        />
-        <Stack.Screen
-          name="Register"
-          component={RegisterScreen}
-          initialParams={{ userRole: userRole }}
-          options={{ title: "Register" }}
-        />
-        <Stack.Screen
-          name="UserProfile"
-          component={UserProfileScreen}
-          initialParams={{ userRole: userRole }}
-          options={{ title: "UserProfile" }}
-        />
-        <Stack.Screen
-          name="CompanyProfile"
-          component={CompanyProfileScreen}
-          initialParams={{ userRole: userRole }}
-          options={{ title: "CompanyProfile" }}
-        />
-        <Stack.Screen
-          name="Dashboard"
-          component={DashboardScreen}
-          initialParams={{ userRole: userRole }}
-          options={({ navigation }) => ({
-            title: "Dashboard",
-            headerTitleStyle: {
-              fontWeight: "bold",
-            },
-            headerRight: () => (
-              <Pressable
-                onPress={() => {
-                  const targetScreen =
-                    userRole === "admin" ? "CompanyProfile" : "UserProfile";
-                  navigation.navigate(targetScreen, { userRole });
-                }}>
-                <Text style={{ color: "#fff", fontSize: 16 }}>Profile</Text>
-              </Pressable>
-            ),
-          })}
-        />
-        <Stack.Screen
-          name="Event"
-          component={EventScreen}
-          initialParams={{ userRole: userRole }}
-          options={{ title: "Event" }}
-        />
-        <Stack.Screen
-          name="Booking"
-          component={BookingScreen}
-          initialParams={{ userRole: userRole }}
-          options={{ title: "Booking" }}
-        />
-      </Stack.Navigator>
+      <NavigationStack />
     </NavigationContainer>
   );
 }

@@ -33,7 +33,6 @@ export default function LoginScreen({ navigation }) {
       emailAddress: email,
       password: password
     };
-  
     try {
       const loginResponse = await axios.post(loginURL, payload);
       // console.log(loginResponse.data); // Log the response data
@@ -63,11 +62,14 @@ export default function LoginScreen({ navigation }) {
         }
       });
       if (userResponse.data.success) {
-        const { role, _id } = userResponse.data.data;
-  
+        const { role, _id, name, emailAddress, telPhone } = userResponse.data.data;
+        console.log(userResponse.data.data);
         // Store role and ID in AsyncStorage
         await AsyncStorage.setItem('userRole', role);
         await AsyncStorage.setItem('userID', _id);
+        await AsyncStorage.setItem('userName', name);
+        await AsyncStorage.setItem('userEmail', emailAddress);
+        await AsyncStorage.setItem('userTelPhone', telPhone);
 
         // Verification step: Check what has just been stored
         // console.log("Stored Role:", await AsyncStorage.getItem('userRole'));
