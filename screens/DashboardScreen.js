@@ -48,19 +48,74 @@ export default function DashboardScreen({ navigation }) {
 
     const [eventData, setEventData] = useState([]);
 
+    //get all events for user
+    // useEffect(() => {
+    //     const fetchEvents = async () => {
+    //         try {
+    //             const response = await axios.get('http://127.0.0.1:2000/api/v1/events/getEvents');
+    //             setEventData(response.data.data);
+    //         } catch (error) {
+    //             console.error('Error fetching event data:', error);
+    //             Alert.alert('Error', 'Unable to fetch events');
+    //         }
+    //     };
+
+    //     fetchEvents();
+    // }, []);
+
+    //get evetn for company
+    // useEffect(() => {
+    //     const fetchCompanyInfo = async () => {
+    //         // Ensure that userID is available before making the API call
+    //         if (!userDetails.userID) return;
+    
+    //         try {
+    //             const url = `http://127.0.0.1:2000/api/v1/events//users/${userDetails.userID}`;
+    //             const response = await axios.get(url);
+    //             if (response.data && response.data.success) {
+    //                 setEventData(response.data.data);
+    //             } else {
+    //                 console.error('No data found');
+    //                 Alert.alert('Error', 'No company information available');
+    //             }
+    //         } catch (error) {
+    //             console.error('Error fetching company information:', error);
+    //             Alert.alert('Error', 'Unable to fetch company information');
+    //         }
+    //     };
+    
+    //     fetchCompanyInfo();
+    // }, [userDetails.userID]);  // Dependency on userDetails.userID ensures fetch is attempted only after userID is available
     useEffect(() => {
         const fetchEvents = async () => {
+            if (!userDetails.userRole || !userDetails.userID) return;
+    
+            let url;
+            if (userDetails.userRole === 'admin') {
+                // For admins, fetch events related to the user
+                url = `http://127.0.0.1:2000/api/v1/events/users/${userDetails.userID}`;
+            } else {
+                // For regular users, fetch all events
+                url = 'http://127.0.0.1:2000/api/v1/events/getEvents';
+            }
+    
             try {
-                const response = await axios.get('http://127.0.0.1:2000/api/v1/events/getEvents');
-                setEventData(response.data.data);
+                const response = await axios.get(url);
+                if (response.data && response.data.success) {
+                    setEventData(response.data.data);
+                } else {
+                    console.error('No data found');
+                    Alert.alert('Error', 'No events information available');
+                }
             } catch (error) {
                 console.error('Error fetching event data:', error);
                 Alert.alert('Error', 'Unable to fetch events');
             }
         };
-
+    
         fetchEvents();
-    }, []);
+    }, [userDetails.userRole, userDetails.userID]);  // Dependency on userDetails ensures fetch is attempted only after these details are available
+    
 
     const bookingData = [
         {
