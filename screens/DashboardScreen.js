@@ -83,6 +83,7 @@ export default function DashboardScreen({ navigation }) {
                     console.error('No data found');
                     Alert.alert('Error', 'No events information available');
                 }
+                console.log(eventData);
             } catch (error) {
                 console.error('Error fetching event data:', error);
                 Alert.alert('Error', 'Unable to fetch events');
@@ -96,28 +97,43 @@ export default function DashboardScreen({ navigation }) {
     useEffect(() => {
         const fetchBookingDetails = async () => {
             if (!userDetails.userRole || !userDetails.userID) return;
-    
+        
             let url;
             if (userDetails.userRole === 'admin') {
                 url = `http://127.0.0.1:2000/api/v1/bookingDetails/getBookingDetailsForAdmin/${userDetails.userID}`;
             } else {
                 url = `http://127.0.0.1:2000/api/v1/bookingDetails/getBookingDetailsByUser/${userDetails.userID}`;
             }
-    
+        
             try {
                 const response = await axios.get(url);
                 if (response.data && response.data.success) {
                     setBookings(response.data.data);
+                    if (response.data.data.length === 0) {
+                        setBookingError(true);
+                        setErrorMessage('No booking information available');
+                    } else {
+                        setBookingError(false);
+                    }
                 } else {
-                    console.error('No data found');
-                    Alert.alert('Error', 'No booking information available');
+                    setBookingError(true);
+                    setErrorMessage('No booking information available');
                 }
-                // console.log(booking.event);
             } catch (error) {
-                console.error('Error fetching booking data:', error);
-                Alert.alert('Error', 'Unable to fetch bookings');
+                if (error.response && error.response.status === 404) {
+                    // Handle 404 error quietly
+                    setBookingError(true);
+                    setErrorMessage('No booking information available');
+                } else {
+                    // For other errors, you may still want to log them or handle differently
+                    console.error('Error fetching booking data:', error);
+                    setBookingError(true);
+                    setErrorMessage('Unable to fetch bookings');
+                }
             }
         };
+        
+        
     
         fetchBookingDetails();
     }, [userDetails.userRole, userDetails.userID]);
@@ -153,6 +169,10 @@ export default function DashboardScreen({ navigation }) {
         fetchBookingDetails();  // Assuming this fetches the latest booking details
         setRefreshing(false);
     };
+    const [bookingError, setBookingError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+
+
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <SafeAreaView style={{ flex: 1 }}>
@@ -196,11 +216,11 @@ export default function DashboardScreen({ navigation }) {
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight:20, paddingTop: 5 }}>
                     <Text style={{ fontSize: 22, fontWeight: 'bold', paddingHorizontal: 20, paddingVertical: 10, paddingTop: 5, color: '#333', borderBottomWidth: 1, borderBottomColor: '#e1e4e8' }}>Events</Text>
-                    {userDetails.userRole === 'admin' && (
+                    {/* {userDetails.userRole === 'admin' && (
                         <TouchableOpacity onPress={() => navigation.navigate('Event', { type: 'create' })}>
                             <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#007BFF' }}>Create</Text>
                         </TouchableOpacity>
-                    )}
+                    )} */}
                 </View>
                 <ScrollView
                     horizontal={true}
@@ -208,37 +228,37 @@ export default function DashboardScreen({ navigation }) {
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ paddingStart: 10, paddingEnd: 10 }}
                 >
-                    {eventData.map((event, index) => (
-                        <TouchableOpacity key={index} onPress={() => navigation.navigate('Booking', { eventID: event._id, type: 'event' })}>
+                    {eventData.map((event) => (
                             <View style={styles.box}>
                                 {/* <Image source={{ uri: 'https://example.com/path/to/image.png' }} style={styles.image} /> */}
                                 <Text style={styles.eventName}>{event.eventTitle}</Text>
                                 <Text style={styles.eventDescription}>{event.eventDescription}</Text>
                             </View>
-                        </TouchableOpacity>
                     ))}
                 </ScrollView>
                 <Text style={styles.header}>Your Bookings</Text>
                 <ScrollView style={styles.bookingScrollView}>
-                {bookings.map((booking, index) => (
-                    <Swipeable
-                        key={index}
-                        renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, booking.booking._id)}
-                    >
-                        <View style={styles.bookingBox}>
-                            <Text style={styles.bookingDate}>{new Date(booking.event.slot.startTime).toLocaleDateString('en-US', dateOnlyOptions)}</Text>
-                            <Text style={styles.bookingCompanyName}>{booking.company.name}</Text>
-                            <Text style={styles.bookingPosition}>{booking.booking.jobPosition}</Text>
-                            <Text style={styles.bookingTime}>
-                                {new Date(booking.event.slot.startTime).toLocaleString('en-US', timeOnlyOptions)}-{new Date(booking.event.slot.endTime).toLocaleString('en-US', timeOnlyOptions)}
-                             </Text>
-                            {/* <TouchableOpacity style={styles.bookingButton}>
-                                <Text style={styles.buttonText} onPress={() => navigation.navigate('Booking', { type: 'See booking', bookingID: booking.booking._id })}>See Booking</Text>
-                            </TouchableOpacity> */}
+                    {bookingError ? (
+                        <View style={styles.noBookingView}>
+                            <Text style={styles.noBookingText}>{errorMessage}</Text>
                         </View>
-                    </Swipeable>
-                ))}
+                    ) : bookings.map((booking, index) => (
+                        <Swipeable
+                            key={index}
+                            renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, booking.booking._id)}
+                        >
+                            <View style={styles.bookingBox}>
+                                <Text style={styles.bookingDate}>{new Date(booking.event.slot.startTime).toLocaleDateString('en-US', dateOnlyOptions)}</Text>
+                                <Text style={styles.bookingCompanyName}>{booking.company.name}</Text>
+                                <Text style={styles.bookingPosition}>{booking.booking.jobPosition}</Text>
+                                <Text style={styles.bookingTime}>
+                                    {new Date(booking.event.slot.startTime).toLocaleString('en-US', timeOnlyOptions)}-{new Date(booking.event.slot.endTime).toLocaleString('en-US', timeOnlyOptions)}
+                                </Text>
+                            </View>
+                        </Swipeable>
+                    ))}
                 </ScrollView>
+
             </SafeAreaView>
         </GestureHandlerRootView>
     );
@@ -415,5 +435,14 @@ const styles = StyleSheet.create({
     profileValue: {
         fontSize: 16, // Font size for values
         color: '#333', // Darker text for emphasis on content
-    }
+    },
+    noBookingView: {
+        padding: 20,
+        alignItems: 'center',
+    },
+    noBookingText: {
+        fontSize: 16,
+        color: '#666',
+    },
+    
 });
