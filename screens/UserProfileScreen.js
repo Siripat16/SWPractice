@@ -147,7 +147,10 @@ export default function UserProfileScreen({ navigation, route }) {
 
           if (response.data.success) {
               await AsyncStorage.multiRemove(['userRole', 'userID', 'userToken']);
-              navigation.navigate('Home');
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Home' }],
+            });
           } else {
               console.error('Logout failed with response:', response.data);
           }
