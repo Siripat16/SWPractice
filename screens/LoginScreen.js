@@ -150,7 +150,7 @@ export default function LoginScreen({ navigation }) {
         <Text>
           Don't have an account?{" "}
           <Text
-            onPress={() => navigation.navigate("SignUp")}
+            onPress={() => navigation.navigate("Register")}
             style={styles.linkText}>
             create a new account
           </Text>
