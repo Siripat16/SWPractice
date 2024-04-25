@@ -16,8 +16,7 @@ import axios from "axios"; // Import axios to make HTTP requests
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation hook
 
 
-export default function SignUpScreen({ route }) {
-  // const { userRole } = route.params;
+export default function SignUpScreen({  }) {
   const [formData, setFormData] = useState({
     name: "",
     tel: "",

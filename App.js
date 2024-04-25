@@ -7,7 +7,7 @@ import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 
 // Import your screens here...
-import HomeScreen from "./screens/HomeScreen";
+// import HomeScreen from "./screens/HomeScreen";
 import DashboardScreen from "./screens/DashboardScreen";
 import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
@@ -46,9 +46,9 @@ function NavigationStack() {
     }
   };
 
-  React.useEffect(() => {
-    fetchUserRole();
-  }, []);
+  // React.useEffect(() => {
+  //   fetchUserRole();
+  // }, []);
 
   return (
     <Stack.Navigator

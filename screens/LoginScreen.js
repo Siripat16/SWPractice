@@ -17,37 +17,6 @@ export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Storing the token
-  // const storeToken = async (token) => {
-  //   try {
-  //     await AsyncStorage.setItem('userToken', token);
-  //   } catch (error) {
-  //     console.error('Error saving the token', error);
-  //   }
-  // };
-
-//   const handleLogout = async () => {
-//     try {
-//         const response = await axios.get('http://127.0.0.1:2000/api/v1/auth/logout', {
-//             headers: {
-//                 'Authorization': `Bearer ${userDetails.token}`
-//             }
-//         });
-
-//         if (response.data.success) {
-//             await AsyncStorage.multiRemove(['userRole', 'userID', 'userToken']);
-//             navigation.navigate('Home');
-//         } else {
-//             console.error('Logout failed with response:', response.data);
-//         }
-//     } catch (error) {
-//         console.error('Logout failed:', error.response ? error.response.data : error.message);
-//     }
-// };
-// useEffect(() => {
-//   handleLogout();
-// }, []);
-
   // Handle form submission for login
   const handleLogin = async () => {
     const loginURL = 'http://127.0.0.1:2000/api/v1/auth/login';
@@ -57,12 +26,22 @@ export default function LoginScreen({ navigation }) {
     };
     try {
       const loginResponse = await axios.post(loginURL, payload);
-      // console.log(loginResponse.data); // Log the response data
-  
-      // Check if login was successful
       if (loginResponse.data.success && loginResponse.data.token) {
-        await AsyncStorage.setItem('userToken', loginResponse.data.token); // Store the token
-        fetchUserRole(); // Now fetch user role after storing the token
+        await AsyncStorage.setItem('userToken', loginResponse.data.token);
+        // fetchUserRole();  // Correct place to fetch user details
+        // console.log(loginResponse.data)
+        // Store role and ID in AsyncStorage
+        await AsyncStorage.setItem('userRole', loginResponse.data.role);
+        await AsyncStorage.setItem('userID', loginResponse.data.userId);
+        await AsyncStorage.setItem('userName', loginResponse.data.name);
+        await AsyncStorage.setItem('userEmail', loginResponse.data.emailAddress);
+        await AsyncStorage.setItem('userTelPhone', loginResponse.data.telPhone);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Dashboard' }],
+      });
+      } else {
+        Alert.alert("Login Failed", "Invalid email or password");
       }
     } catch (error) {
       console.error("Login failed:", error.response ? error.response.data : error);
@@ -73,47 +52,44 @@ export default function LoginScreen({ navigation }) {
     }
   };
   
+  
 
-  const fetchUserRole = async () => {
-    const userURL = 'http://127.0.0.1:2000/api/v1/auth/getLoggedInUser/';
-    try {
-      const token = await AsyncStorage.getItem('userToken'); // Retrieve the stored token
-      const userResponse = await axios.get(userURL, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (userResponse.data.success) {
-        const { role, _id, name, emailAddress, telPhone } = userResponse.data.data;
-        console.log(userResponse.data.data);
-        // Store role and ID in AsyncStorage
-        await AsyncStorage.setItem('userRole', role);
-        await AsyncStorage.setItem('userID', _id);
-        await AsyncStorage.setItem('userName', name);
-        await AsyncStorage.setItem('userEmail', emailAddress);
-        await AsyncStorage.setItem('userTelPhone', telPhone);
+  // const fetchUserRole = async () => {
+  //   const userURL = 'http://127.0.0.1:2000/api/v1/auth/getLoggedInUser/';
+  //   try {
+  //     const token = await AsyncStorage.getItem('userToken'); // Retrieve the stored token
+  //     const userResponse = await axios.get(userURL, {
+  //       headers: {
+  //         'Authorization': `Bearer ${token}`
+  //       }
+  //     });
+  //     if (userResponse.data.success) {
+  //       const { role, _id, name, emailAddress, telPhone } = userResponse.data.data;
+  //       console.log(userResponse.data.data);
+  //       // Store role and ID in AsyncStorage
+  //       await AsyncStorage.setItem('userRole', role);
+  //       await AsyncStorage.setItem('userID', _id);
+  //       await AsyncStorage.setItem('userName', name);
+  //       await AsyncStorage.setItem('userEmail', emailAddress);
+  //       await AsyncStorage.setItem('userTelPhone', telPhone);
 
-        // Verification step: Check what has just been stored
-        // console.log("Stored Role:", await AsyncStorage.getItem('userRole'));
-        // console.log("Stored ID:", await AsyncStorage.getItem('userID'));
+  //       // Verification step: Check what has just been stored
+  //       // console.log("Stored Role:", await AsyncStorage.getItem('userRole'));
+  //       // console.log("Stored ID:", await AsyncStorage.getItem('userID'));
 
-        // Navigate to Dashboard with role and ID as parameters if needed
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Dashboard' }],
-        });
-        
-      } else {
-        throw new Error("Failed to fetch user role");
-      }
-    } catch (error) {
-      console.error("Fetching user role failed:", error);
-      Alert.alert(
-        "Error",
-        "Unable to fetch user details after login."
-      );
-    }
-  };
+  //       // Navigate to Dashboard with role and ID as parameters if needed
+  //       navigation.navigate('Dashboard');
+  //     } else {
+  //       throw new Error("Failed to fetch user role");
+  //     }
+  //   } catch (error) {
+  //     console.error("Fetching user role failed:", error);
+  //     Alert.alert(
+  //       "Error",
+  //       "Unable to fetch user details after login."
+  //     );
+  //   }
+  // };
   
   
 

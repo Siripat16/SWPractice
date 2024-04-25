@@ -4,29 +4,40 @@ import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScrollView, GestureHandlerRootView } from 'react-native-gesture-handler';
-import { CommonActions } from '@react-navigation/native';
 import defaultProfilePic from '../assets/user.png'; // Adjust the path as necessary
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function UserProfileScreen({ navigation, route }) {
+export default function UserProfileScreen({ navigation }) {
     
-    const { userID, token } = route.params;
-    const studentID = userID;
-    const [imageUri, setImageUri] = useState(null);
-    const [userProfile, setUserProfile] = useState(null);
-    const [editing, setEditing] = useState(false);
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [resume, setResume] = useState('');
-    // const userID = '6627f6a38aa54820960b636e';
-    // const navigation = useNavigation();
+  const [userID, setUserID] = useState('');
+  const [token, setToken] = useState('');
+  const [imageUri, setImageUri] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [resume, setResume] = useState('');
 
 
-    useEffect(() => {
+  useEffect(() => {
+    async function loadUserData() {
+        const storedUserID = await AsyncStorage.getItem('userID');
+        const storedToken = await AsyncStorage.getItem('userToken');
+        setUserID(storedUserID);
+        setToken(storedToken);
         requestMediaLibraryPermissions();
-        fetchUserProfile(userID);
-    }, [userID]);
+        fetchUserProfile(storedUserID);
+    }
+    loadUserData();
+}, []);
+
+  async function requestMediaLibraryPermissions() {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+        console.error('Permission denied for media library');
+    }
+  }
 
     async function requestMediaLibraryPermissions() {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -36,73 +47,77 @@ export default function UserProfileScreen({ navigation, route }) {
     }
 
     async function fetchUserProfile(userID) {
-        try {
-            const url = `http://127.0.0.1:2000/api/v1/auth/user/${userID}`;
-            const response = await axios.get(url);
+      try {
+          const url = `http://127.0.0.1:2000/api/v1/auth/user/${userID}`;
+          const response = await axios.get(url);
 
-            if (response.data.success && response.data.data) {
-                const profileData = response.data.data;
-
-                const imageUri = profileData.picture ? `data:image/jpeg;base64,${profileData.picture}` : null;
-
-                setUserProfile({
-                    name: profileData.name,
-                    email: profileData.emailAddress,
-                    phoneNumber: profileData.telPhone,
-                    profilePicture: imageUri,
-                    resume: profileData.resume,
-                });
-
-                setName(profileData.name);
-                setEmail(profileData.emailAddress);
-                setPhoneNumber(profileData.telPhone);
-                setResume(profileData.resume);
-
-                // Format the resume text
-                const formattedResume = profileData.resume.replace(/\\n/g, '\n');
-                setResume(formattedResume);
-            } else {
-                console.error('No user data found:', response.data);
-            }
-        } catch (error) {
-            console.error('Failed to fetch user profile:', error);
-        }
-    }
+          if (response.data.success && response.data.data) {
+              const profileData = response.data.data;
+              const imageUri = profileData.picture ? `data:image/jpeg;base64,${profileData.picture}` : null;
+              setUserProfile({
+                  name: profileData.name,
+                  email: profileData.emailAddress,
+                  phoneNumber: profileData.telPhone,
+                  profilePicture: imageUri,
+                  resume: profileData.resume.replace(/\\n/g, '\n'),
+              });
+              setName(profileData.name);
+              setEmail(profileData.emailAddress);
+              setPhoneNumber(profileData.telPhone);
+              setResume(profileData.resume.replace(/\\n/g, '\n'));
+          } else {
+              console.error('No user data found:', response.data);
+          }
+      } catch (error) {
+          console.error('Failed to fetch user profile:', error);
+      }
+  }
 
     async function uploadImage() {
-        if (!imageUri) {
-            return;
-        }
+      if (!imageUri) {
+          return;
+      }
 
-        const formData = new FormData();
-        let filename = imageUri.split('/').pop();
-        let match = /\.(\w+)$/.exec(filename);
-        let type = match ? `image/${match[1]}` : 'image/jpeg';
+      const formData = new FormData();
+      let filename = imageUri.split('/').pop();
+      let match = /\.(\w+)$/.exec(filename);
+      let type = match ? `image/${match[1]}` : 'image/jpeg';
 
-        formData.append('file', {
-            uri: imageUri,
-            type: type,
-            name: filename || 'upload.jpg'
-        });
+      formData.append('file', {
+          uri: imageUri,
+          type: type,
+          name: filename || 'upload.jpg'
+      });
 
-        try {
-            const response = await axios({
-                url: `http://127.0.0.1:2000/api/v1/auth/user/${studentID}`,
-                method: 'PUT',
-                data: formData,
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-        } catch (error) {
-            console.error("Error uploading image: ", error);
-            Alert.alert('Upload Failed', 'Failed to upload image.');
-        }
-    }
+      try {
+          const response = await axios({
+              url: `http://127.0.0.1:2000/api/v1/auth/user/${userID}`,
+              method: 'PUT',
+              data: formData,
+              headers: {
+                  'Content-Type': 'multipart/form-data',
+              },
+          });
+
+          // Check if the response indicates success
+          if (response.status === 200 && response.data.success) {
+               console.log('Success', 'Image uploaded successfully.');
+              // Optionally perform additional actions, e.g., updating state or UI
+          } else {
+              // Handle failure, perhaps due to server-side issues
+              Alert.alert('Upload Failed', 'The server encountered an issue.');
+          }
+      } catch (error) {
+          console.error("Error uploading image: ", error);
+          // Communicate the error to the user
+          Alert.alert('Upload Failed', 'Failed to upload image.');
+      }
+  }
+
 
     async function saveProfile() {
         try {
-            const url = `http://127.0.0.1:2000/api/v1/auth/user/${studentID}`;
+            const url = `http://127.0.0.1:2000/api/v1/auth/user/${userID}`;
             const response = await axios.put(url, {
                 name,
                 emailAddress: email,
@@ -111,7 +126,7 @@ export default function UserProfileScreen({ navigation, route }) {
             });
 
             if (response.data.success) {
-                fetchUserProfile(studentID);
+                fetchUserProfile(userID);
                 setEditing(false);
                 // Alert.alert('Profile Updated', 'Your profile has been successfully updated.');
             } else {
@@ -146,17 +161,13 @@ export default function UserProfileScreen({ navigation, route }) {
           });
   
           if (response.data.success) {
-              await AsyncStorage.multiRemove(['userRole', 'userID', 'userToken']);
-              
-              // Reset the navigation stack and navigate to the Login screen
-              navigation.dispatch(
-                  CommonActions.reset({
-                      index: 0,
-                      routes: [
-                          { name: 'Login' }, // Change 'Login' to the name of your login screen as defined in your navigator
-                      ],
-                  })
-              );
+              await AsyncStorage.multiRemove([
+      'userRole', 'userID', 'userToken', 'userName', 'userEmail', 'userTelPhone'
+    ]);
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Home' }],
+            });
           } else {
               console.error('Logout failed with response:', response.data);
           }

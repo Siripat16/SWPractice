@@ -17,7 +17,6 @@ export default function CompanyProfileScreen({ navigation }) {
         name: "",
         description: "",
         phone: "",
-        email: ""
     });
 
     const [companyId, setCompanyId] = useState(""); // State to store the company ID
@@ -99,11 +98,13 @@ export default function CompanyProfileScreen({ navigation }) {
             });
 
             if (response.data.success) {
-                await AsyncStorage.multiRemove(['userRole', 'userID', 'userToken']);
+                await AsyncStorage.multiRemove([
+                    'userRole', 'userID', 'userToken', 'userName', 'userEmail', 'userTelPhone'
+                  ]);
                 navigation.reset({
                     index: 0,
                     routes: [{ name: 'Home' }],
-                  });
+                });
             } else {
                 console.error('Logout failed with response:', response.data);
             }
@@ -139,7 +140,6 @@ export default function CompanyProfileScreen({ navigation }) {
             ) : (
                 <Text style={styles.descriptionText}>{companyProfile.description}</Text>
             )}
-
             <Text style={styles.infoText}>{companyProfile.phone}</Text>
 
 
