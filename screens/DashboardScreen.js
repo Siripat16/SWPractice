@@ -133,8 +133,6 @@ export default function DashboardScreen({ navigation }) {
             }
         };
         
-        
-    
         fetchBookingDetails();
     }, [userDetails.userRole, userDetails.userID]);
 
