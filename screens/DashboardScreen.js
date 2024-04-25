@@ -62,78 +62,70 @@ export default function DashboardScreen({ navigation }) {
 
     const [eventData, setEventData] = useState([]);
 
-    useEffect(() => {
-        const fetchEvents = async () => {
-            if (!userDetails.userRole || !userDetails.userID) return;
-    
-            let url;
-            if (userDetails.userRole === 'admin') {
-                // For admins, fetch events related to the user
-                url = `http://127.0.0.1:2000/api/v1/events/users/${userDetails.userID}`;
-            } else {
-                // For regular users, fetch all events
-                url = 'http://127.0.0.1:2000/api/v1/events/getEvents';
-            }
-    
-            try {
-                const response = await axios.get(url);
-                if (response.data && response.data.success) {
-                    setEventData(response.data.data);
-                } else {
-                    console.error('No data found');
-                    Alert.alert('Error', 'No events information available');
-                }
-                console.log(eventData);
-            } catch (error) {
-                console.error('Error fetching event data:', error);
-                Alert.alert('Error', 'Unable to fetch events');
-            }
-        };
-    
-        fetchEvents();
-    }, [userDetails.userRole, userDetails.userID]);  // Dependency on userDetails ensures fetch is attempted only after these details are available
-    
+
     const [bookings, setBookings] = useState([]);
-    useEffect(() => {
-        const fetchBookingDetails = async () => {
-            if (!userDetails.userRole || !userDetails.userID) return;
-        
-            let url;
-            if (userDetails.userRole === 'admin') {
-                url = `http://127.0.0.1:2000/api/v1/bookingDetails/getBookingDetailsForAdmin/${userDetails.userID}`;
+    const fetchBookingDetails = async () => {
+        if (!userDetails.userRole || !userDetails.userID) return;
+
+        let url = userDetails.userRole === 'admin' ?
+            `http://127.0.0.1:2000/api/v1/bookingDetails/getBookingDetailsForAdmin/${userDetails.userID}` :
+            `http://127.0.0.1:2000/api/v1/bookingDetails/getBookingDetailsByUser/${userDetails.userID}`;
+
+        try {
+            const response = await axios.get(url);
+            if (response.data && response.data.success) {
+                setBookings(response.data.data);
+                setBookingError(response.data.data.length === 0);
+                setErrorMessage(response.data.data.length === 0 ? 'No booking information available' : '');
+                console.log(bookings)
             } else {
-                url = `http://127.0.0.1:2000/api/v1/bookingDetails/getBookingDetailsByUser/${userDetails.userID}`;
+                setBookingError(true);
+                setErrorMessage('No booking information available');
             }
-        
-            try {
-                const response = await axios.get(url);
-                if (response.data && response.data.success) {
-                    setBookings(response.data.data);
-                    if (response.data.data.length === 0) {
-                        setBookingError(true);
-                        setErrorMessage('No booking information available');
-                    } else {
-                        setBookingError(false);
-                    }
-                } else {
-                    setBookingError(true);
-                    setErrorMessage('No booking information available');
-                }
-            } catch (error) {
-                if (error.response && error.response.status === 404) {
-                    // Handle 404 error quietly
-                    setBookingError(true);
-                    setErrorMessage('No booking information available');
-                } else {
-                    // For other errors, you may still want to log them or handle differently
-                    console.error('Error fetching booking data:', error);
-                    setBookingError(true);
-                    setErrorMessage('Unable to fetch bookings');
-                }
+        } catch (error) {
+            const is404 = error.response && error.response.status === 404;
+            setBookingError(true);
+            setErrorMessage(is404 ? 'No booking information available' : 'Unable to fetch bookings');
+            if (!is404) {
+                console.error('Error fetching booking data:', error);
             }
-        };
-        
+        }
+    };
+
+    // useEffect hook to call fetchBookingDetails
+    useEffect(() => {
         fetchBookingDetails();
+    }, [userDetails.userRole, userDetails.userID]);
+    
+    const fetchEvents = async () => {
+        if (!userDetails.userRole || !userDetails.userID) return;
+
+        let url;
+        if (userDetails.userRole === 'admin') {
+            // For admins, fetch events related to the user
+            url = `http://127.0.0.1:2000/api/v1/events/users/${userDetails.userID}`;
+        } else {
+            // For regular users, fetch all events
+            url = 'http://127.0.0.1:2000/api/v1/events/getEvents';
+        }
+
+        try {
+            const response = await axios.get(url);
+            if (response.data && response.data.success) {
+                setEventData(response.data.data);
+            } else {
+                console.error('No data found');
+                Alert.alert('Error', 'No events information available');
+            }
+        } catch (error) {
+            console.error('Error fetching event data:', error);
+            Alert.alert('Error', 'Unable to fetch events');
+        }
+    };
+
+    // useEffect hook to call fetchEvents
+    useEffect(() => {
+        fetchEvents();
     }, [userDetails.userRole, userDetails.userID]);
 
     const renderRightActions = (progress, dragX, bookingID) => {
@@ -158,108 +150,187 @@ export default function DashboardScreen({ navigation }) {
         console.log(`Booking ${bookingID} deleted`);
     };
     // console.log('user detail',userDetails);
-
-    const [refreshing, setRefreshing] = useState(false);
-    const onRefresh = async () => {
-        setRefreshing(true);
-        // Place your data fetching logic here
-        fetchEvents();  // Assuming fetchEvents fetches the latest events data
-        fetchBookingDetails();  // Assuming this fetches the latest booking details
-        setRefreshing(false);
-    };
     const [bookingError, setBookingError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
 
-    return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-            <SafeAreaView style={{ flex: 1 }}>
-                
-                {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight:20, paddingTop: 5 }}>
-                    <Text style={{ fontSize: 22, fontWeight: 'bold', paddingHorizontal: 20, paddingVertical: 10, paddingTop: 5, color: '#333', borderBottomWidth: 1, borderBottomColor: '#e1e4e8' }}>Your info</Text>
-                </View> */}
-                <View style={styles.profileContainer}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-                    <Text style={styles.profileHeader}>Profile</Text>
-                    <Button 
-                        title="See more" 
-                        onPress={() => {
-                            // Check the user role and navigate accordingly
-                            const targetScreen = userDetails.userRole === 'admin' ? 'CompanyProfile' : 'UserProfile';
-                            navigation.navigate(targetScreen, { userID: userDetails.userID, token: userDetails.token });
-                        }} 
-                    />
-                </View>
+    //Pull to request
+    const [refreshing, setRefreshing] = useState(false);
 
-                    <View style={styles.profileInfo}>
-                        <Text style={styles.profileLabel}>Name:</Text>
-                        <Text style={styles.profileValue}>{userDetails.userName}</Text>
+    const onRefresh = async () => {
+        setRefreshing(true);
+        try {
+            await fetchUserDetails();  // Refresh user details
+            await fetchEvents();       // Refresh events
+            await fetchBookingDetails();  // Refresh booking details
+        } catch (error) {
+            console.error('Refresh error:', error);
+        }
+        setRefreshing(false);
+    };
+
+    // return (
+    //     <GestureHandlerRootView style={{ flex: 1 }}>
+    //         <SafeAreaView style={{ flex: 1 }}>
+                
+    //             {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight:20, paddingTop: 5 }}>
+    //                 <Text style={{ fontSize: 22, fontWeight: 'bold', paddingHorizontal: 20, paddingVertical: 10, paddingTop: 5, color: '#333', borderBottomWidth: 1, borderBottomColor: '#e1e4e8' }}>Your info</Text>
+    //             </View> */}
+    //             <View style={styles.profileContainer}>
+    //             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+    //                 <Text style={styles.profileHeader}>Profile</Text>
+    //                 <Button 
+    //                     title="See more" 
+    //                     onPress={() => {
+    //                         // Check the user role and navigate accordingly
+    //                         const targetScreen = userDetails.userRole === 'admin' ? 'CompanyProfile' : 'UserProfile';
+    //                         navigation.navigate(targetScreen, { userID: userDetails.userID, token: userDetails.token });
+    //                     }} 
+    //                 />
+    //             </View>
+
+    //                 <View style={styles.profileInfo}>
+    //                     <Text style={styles.profileLabel}>Name:</Text>
+    //                     <Text style={styles.profileValue}>{userDetails.userName}</Text>
+    //                 </View>
+    //                 <View style={styles.profileInfo}>
+    //                     <Text style={styles.profileLabel}>Email:</Text>
+    //                     <Text style={styles.profileValue}>{userDetails.email}</Text>
+    //                 </View>
+    //                 <View style={styles.profileInfo}>
+    //                     <Text style={styles.profileLabel}>Tel:</Text>
+    //                     <Text style={styles.profileValue}>{userDetails.telPhone}</Text>
+    //                 </View>
+
+    //             </View>
+    //             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight:20, paddingTop: 5 }}>
+    //                 <Text style={{ fontSize: 22, fontWeight: 'bold', paddingHorizontal: 20, paddingVertical: 10, paddingTop: 5, color: '#333', borderBottomWidth: 1, borderBottomColor: '#e1e4e8' }}>Events</Text>
+
+    //             </View>
+    //             <ScrollView
+    //                 horizontal={true}
+    //                 style={{ height: 230, marginTop: 5 }}
+    //                 showsHorizontalScrollIndicator={false}
+    //                 contentContainerStyle={{ paddingStart: 10, paddingEnd: 10 }}
+    //             >
+    //                 {eventData.map((event, index) => (
+    //                         <View key={event.id || index} style={styles.box}> 
+    //                             <Text style={styles.eventName}>{event.eventTitle}</Text>
+    //                             <Text style={styles.eventDescription}>{event.eventDescription}</Text>
+    //                         </View>
+    //                 ))}
+    //             </ScrollView>
+    //             <Text style={styles.header}>Your Bookings</Text>
+    //             <ScrollView style={styles.bookingScrollView}>
+    //                 {bookingError ? (
+    //                     <View style={styles.noBookingView}>
+    //                         <Text style={styles.noBookingText}>{errorMessage}</Text>
+    //                     </View>
+    //                 ) : bookings.map((booking, index) => (
+    //                     <Swipeable
+    //                         key={index}
+    //                         renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, booking.booking._id)}
+    //                     >
+    //                         <View style={styles.bookingBox}>
+    //                             <Text style={styles.bookingDate}>{new Date(booking.event.slot.startTime).toLocaleDateString('en-US', dateOnlyOptions)}</Text>
+    //                             <Text style={styles.bookingCompanyName}>{booking.company.name}</Text>
+    //                             <Text style={styles.bookingPosition}>{booking.booking.jobPosition}</Text>
+    //                             <Text style={styles.bookingTime}>
+    //                                 {new Date(booking.event.slot.startTime).toLocaleString('en-US', timeOnlyOptions)}-{new Date(booking.event.slot.endTime).toLocaleString('en-US', timeOnlyOptions)}
+    //                             </Text>
+    //                         </View>
+    //                     </Swipeable>
+    //                 ))}
+    //             </ScrollView>
+
+    //         </SafeAreaView>
+    //     </GestureHandlerRootView>
+    // );
+    return (
+        <SafeAreaView style={{ flex: 1 }}>
+            <ScrollView
+                contentContainerStyle={{ flexGrow: 1 }}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
+                }
+            >
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                    {/* Profile Section */}
+                    <View style={styles.profileContainer}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                            <Text style={styles.profileHeader}>Profile</Text>
+                            <Button 
+                                title="See more" 
+                                onPress={() => {
+                                    // Navigate based on user role
+                                    const targetScreen = userDetails.userRole === 'admin' ? 'CompanyProfile' : 'UserProfile';
+                                    navigation.navigate(targetScreen, { userID: userDetails.userID, token: userDetails.token });
+                                }} 
+                            />
+                        </View>
+                        <View style={styles.profileInfo}>
+                            <Text style={styles.profileLabel}>Name:</Text>
+                            <Text style={styles.profileValue}>{userDetails.userName}</Text>
+                        </View>
+                        <View style={styles.profileInfo}>
+                            <Text style={styles.profileLabel}>Email:</Text>
+                            <Text style={styles.profileValue}>{userDetails.email}</Text>
+                        </View>
+                        <View style={styles.profileInfo}>
+                            <Text style={styles.profileLabel}>Tel:</Text>
+                            <Text style={styles.profileValue}>{userDetails.telPhone}</Text>
+                        </View>
                     </View>
-                    <View style={styles.profileInfo}>
-                        <Text style={styles.profileLabel}>Email:</Text>
-                        <Text style={styles.profileValue}>{userDetails.email}</Text>
+    
+                    {/* Events Section */}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight:20, paddingTop: 5 }}>
+                        <Text style={{ fontSize: 22, fontWeight: 'bold', paddingHorizontal: 20, paddingVertical: 10, paddingTop: 5, color: '#333', borderBottomWidth: 1, borderBottomColor: '#e1e4e8' }}>Events</Text>
                     </View>
-                    <View style={styles.profileInfo}>
-                        <Text style={styles.profileLabel}>Tel:</Text>
-                        <Text style={styles.profileValue}>{userDetails.telPhone}</Text>
-                    </View>
-                    {/* <View style={styles.profileInfo}>
-                        <Text style={styles.profileLabel}>Name:</Text>
-                        <Text style={styles.profileValue}>{userDetails.userName}</Text>
-                    </View> */}
-                    {/* <View style={styles.profileInfo}>
-                        <Text style={styles.profileLabel}>Role:</Text>
-                        <Text style={styles.profileValue}>{userDetails.userRole}</Text>
-                    </View> */}
-                </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight:20, paddingTop: 5 }}>
-                    <Text style={{ fontSize: 22, fontWeight: 'bold', paddingHorizontal: 20, paddingVertical: 10, paddingTop: 5, color: '#333', borderBottomWidth: 1, borderBottomColor: '#e1e4e8' }}>Events</Text>
-                    {/* {userDetails.userRole === 'admin' && (
-                        <TouchableOpacity onPress={() => navigation.navigate('Event', { type: 'create' })}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#007BFF' }}>Create</Text>
-                        </TouchableOpacity>
-                    )} */}
-                </View>
-                <ScrollView
-                    horizontal={true}
-                    style={{ height: 230, marginTop: 5 }}
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ paddingStart: 10, paddingEnd: 10 }}
-                >
-                    {eventData.map((event) => (
-                            <View style={styles.box}>
-                                {/* <Image source={{ uri: 'https://example.com/path/to/image.png' }} style={styles.image} /> */}
+                    <ScrollView
+                        horizontal={true}
+                        style={{ height: 230, marginTop: 5 }}
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{ paddingStart: 10, paddingEnd: 10 }}
+                    >
+                        {eventData.map((event, index) => (
+                            <View key={event.id || index} style={styles.box}>
                                 <Text style={styles.eventName}>{event.eventTitle}</Text>
                                 <Text style={styles.eventDescription}>{event.eventDescription}</Text>
                             </View>
-                    ))}
-                </ScrollView>
-                <Text style={styles.header}>Your Bookings</Text>
-                <ScrollView style={styles.bookingScrollView}>
-                    {bookingError ? (
-                        <View style={styles.noBookingView}>
-                            <Text style={styles.noBookingText}>{errorMessage}</Text>
-                        </View>
-                    ) : bookings.map((booking, index) => (
-                        <Swipeable
-                            key={index}
-                            renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, booking.booking._id)}
-                        >
-                            <View style={styles.bookingBox}>
-                                <Text style={styles.bookingDate}>{new Date(booking.event.slot.startTime).toLocaleDateString('en-US', dateOnlyOptions)}</Text>
-                                <Text style={styles.bookingCompanyName}>{booking.company.name}</Text>
-                                <Text style={styles.bookingPosition}>{booking.booking.jobPosition}</Text>
-                                <Text style={styles.bookingTime}>
-                                    {new Date(booking.event.slot.startTime).toLocaleString('en-US', timeOnlyOptions)}-{new Date(booking.event.slot.endTime).toLocaleString('en-US', timeOnlyOptions)}
-                                </Text>
+                        ))}
+                    </ScrollView>
+    
+                    {/* Bookings Section */}
+                    <Text style={styles.header}>Your Bookings</Text>
+                    <ScrollView style={styles.bookingScrollView}>
+                        {bookingError ? (
+                            <View style={styles.noBookingView}>
+                                <Text style={styles.noBookingText}>{errorMessage}</Text>
                             </View>
-                        </Swipeable>
-                    ))}
-                </ScrollView>
-
-            </SafeAreaView>
-        </GestureHandlerRootView>
+                        ) : bookings.map((booking, index) => (
+                            <Swipeable
+                                key={index}
+                                renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, booking.booking._id)}
+                            >
+                                <View style={styles.bookingBox}>
+                                    <Text style={styles.bookingDate}>{new Date(booking.event.slot.startTime).toLocaleDateString('en-US', dateOnlyOptions)}</Text>
+                                    <Text style={styles.bookingCompanyName}>{booking.company.name}</Text>
+                                    <Text style={styles.bookingPosition}>{booking.booking.jobPosition}</Text>
+                                    <Text style={styles.bookingTime}>
+                                        {new Date(booking.event.slot.startTime).toLocaleString('en-US', timeOnlyOptions)}-{new Date(booking.event.slot.endTime).toLocaleString('en-US', timeOnlyOptions)}
+                                    </Text>
+                                </View>
+                            </Swipeable>
+                        ))}
+                    </ScrollView>
+                </GestureHandlerRootView>
+            </ScrollView>
+        </SafeAreaView>
     );
+    
 }
 
 

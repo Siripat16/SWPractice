@@ -1,20 +1,16 @@
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Pressable, Text, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
-
-// Import your screens here...
-// import HomeScreen from "./screens/HomeScreen";
 import DashboardScreen from "./screens/DashboardScreen";
 import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 import UserProfileScreen from "./screens/UserProfileScreen";
 import CompanyProfileScreen from "./screens/CompanyProfileScreen";
-import EventScreen from "./screens/EventScreen";
-import BookingScreen from "./screens/BookingScreen";
+// import EventScreen from "./screens/EventScreen";
+
 
 const Stack = createNativeStackNavigator();
 
@@ -65,8 +61,8 @@ function NavigationStack() {
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="UserProfile" component={UserProfileScreen} />
       <Stack.Screen name="CompanyProfile" component={CompanyProfileScreen} />
-      <Stack.Screen name="Event" component={EventScreen} />
-      <Stack.Screen name="Booking" component={BookingScreen} />
+      {/* <Stack.Screen name="Event" component={EventScreen} /> */}
+      {/* <Stack.Screen name="Booking" component={BookingScreen} /> */}
     </Stack.Navigator>
   );
 }
