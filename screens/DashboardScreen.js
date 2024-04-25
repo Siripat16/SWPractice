@@ -6,7 +6,7 @@ import {
 import { Swipeable } from 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default function DashboardScreen({ navigation }) {
     
@@ -77,7 +77,7 @@ export default function DashboardScreen({ navigation }) {
                 setBookings(response.data.data);
                 setBookingError(response.data.data.length === 0);
                 setErrorMessage(response.data.data.length === 0 ? 'No booking information available' : '');
-                console.log(bookings)
+                // console.log(bookings)
             } else {
                 setBookingError(true);
                 setErrorMessage('No booking information available');
@@ -169,83 +169,6 @@ export default function DashboardScreen({ navigation }) {
         setRefreshing(false);
     };
 
-    // return (
-    //     <GestureHandlerRootView style={{ flex: 1 }}>
-    //         <SafeAreaView style={{ flex: 1 }}>
-                
-    //             {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight:20, paddingTop: 5 }}>
-    //                 <Text style={{ fontSize: 22, fontWeight: 'bold', paddingHorizontal: 20, paddingVertical: 10, paddingTop: 5, color: '#333', borderBottomWidth: 1, borderBottomColor: '#e1e4e8' }}>Your info</Text>
-    //             </View> */}
-    //             <View style={styles.profileContainer}>
-    //             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-    //                 <Text style={styles.profileHeader}>Profile</Text>
-    //                 <Button 
-    //                     title="See more" 
-    //                     onPress={() => {
-    //                         // Check the user role and navigate accordingly
-    //                         const targetScreen = userDetails.userRole === 'admin' ? 'CompanyProfile' : 'UserProfile';
-    //                         navigation.navigate(targetScreen, { userID: userDetails.userID, token: userDetails.token });
-    //                     }} 
-    //                 />
-    //             </View>
-
-    //                 <View style={styles.profileInfo}>
-    //                     <Text style={styles.profileLabel}>Name:</Text>
-    //                     <Text style={styles.profileValue}>{userDetails.userName}</Text>
-    //                 </View>
-    //                 <View style={styles.profileInfo}>
-    //                     <Text style={styles.profileLabel}>Email:</Text>
-    //                     <Text style={styles.profileValue}>{userDetails.email}</Text>
-    //                 </View>
-    //                 <View style={styles.profileInfo}>
-    //                     <Text style={styles.profileLabel}>Tel:</Text>
-    //                     <Text style={styles.profileValue}>{userDetails.telPhone}</Text>
-    //                 </View>
-
-    //             </View>
-    //             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight:20, paddingTop: 5 }}>
-    //                 <Text style={{ fontSize: 22, fontWeight: 'bold', paddingHorizontal: 20, paddingVertical: 10, paddingTop: 5, color: '#333', borderBottomWidth: 1, borderBottomColor: '#e1e4e8' }}>Events</Text>
-
-    //             </View>
-    //             <ScrollView
-    //                 horizontal={true}
-    //                 style={{ height: 230, marginTop: 5 }}
-    //                 showsHorizontalScrollIndicator={false}
-    //                 contentContainerStyle={{ paddingStart: 10, paddingEnd: 10 }}
-    //             >
-    //                 {eventData.map((event, index) => (
-    //                         <View key={event.id || index} style={styles.box}> 
-    //                             <Text style={styles.eventName}>{event.eventTitle}</Text>
-    //                             <Text style={styles.eventDescription}>{event.eventDescription}</Text>
-    //                         </View>
-    //                 ))}
-    //             </ScrollView>
-    //             <Text style={styles.header}>Your Bookings</Text>
-    //             <ScrollView style={styles.bookingScrollView}>
-    //                 {bookingError ? (
-    //                     <View style={styles.noBookingView}>
-    //                         <Text style={styles.noBookingText}>{errorMessage}</Text>
-    //                     </View>
-    //                 ) : bookings.map((booking, index) => (
-    //                     <Swipeable
-    //                         key={index}
-    //                         renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, booking.booking._id)}
-    //                     >
-    //                         <View style={styles.bookingBox}>
-    //                             <Text style={styles.bookingDate}>{new Date(booking.event.slot.startTime).toLocaleDateString('en-US', dateOnlyOptions)}</Text>
-    //                             <Text style={styles.bookingCompanyName}>{booking.company.name}</Text>
-    //                             <Text style={styles.bookingPosition}>{booking.booking.jobPosition}</Text>
-    //                             <Text style={styles.bookingTime}>
-    //                                 {new Date(booking.event.slot.startTime).toLocaleString('en-US', timeOnlyOptions)}-{new Date(booking.event.slot.endTime).toLocaleString('en-US', timeOnlyOptions)}
-    //                             </Text>
-    //                         </View>
-    //                     </Swipeable>
-    //                 ))}
-    //             </ScrollView>
-
-    //         </SafeAreaView>
-    //     </GestureHandlerRootView>
-    // );
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <ScrollView
@@ -291,14 +214,18 @@ export default function DashboardScreen({ navigation }) {
                     </View>
                     <ScrollView
                         horizontal={true}
-                        style={{ height: 230, marginTop: 5 }}
+                        style={{ height: 270, marginTop: 5 }}
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={{ paddingStart: 10, paddingEnd: 10 }}
                     >
                         {eventData.map((event, index) => (
                             <View key={event.id || index} style={styles.box}>
-                                <Text style={styles.eventName}>{event.eventTitle}</Text>
-                                <Text style={styles.eventDescription}>{event.eventDescription}</Text>
+                                <Image source={require("../assets/thumbnail4.png")} style={styles.image} />
+                                <View style={styles.eventTextBox}>
+                                    <Text style={styles.eventName}>{event.eventTitle}</Text>
+                                    <Text style={styles.eventDescription}>{event.eventDescription}</Text>
+                                </View>
+                                
                             </View>
                         ))}
                     </ScrollView>
@@ -337,22 +264,53 @@ export default function DashboardScreen({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff', // Ensuring uniform background color
+        backgroundColor: '#fff', // Uniform background color for consistency
+    },
+    profileContainer: {
+        backgroundColor: '#f7f7f7', // Light grey background for contrast
+        padding: 20,
+        borderRadius: 10,
+        marginHorizontal: 20,
+        marginTop: 20,
+        marginBottom: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.22,
+        shadowRadius: 2.22,
+        elevation: 3,
+    },
+    profileHeader: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 10,
+    },
+    profileInfo: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 5,
+    },
+    profileLabel: {
+        fontSize: 16,
+        color: '#666',
+        fontWeight: 'bold',
+    },
+    profileValue: {
+        fontSize: 16,
+        color: '#333',
     },
     header: {
         fontSize: 22,
         fontWeight: 'bold',
         paddingHorizontal: 20,
-        paddingVertical: 10,
-        paddingTop: 0,
-        // backgroundColor: '#f8f9fa', // Light gray background for headers
-        color: '#333', // Darker text color for better readability
+        paddingVertical: 25,
+        color: '#333',
         borderBottomWidth: 1,
-        borderBottomColor: '#e1e4e8', // Subtle separation
+        borderBottomColor: '#e1e4e8',
     },
     horizontalScroll: {
-        height: 350,
-        marginTop: 5, // Give some space from the header
+        height: 230,
+        marginTop: 5,
     },
     scrollViewContainer: {
         paddingStart: 10,
@@ -360,48 +318,55 @@ const styles = StyleSheet.create({
     },
     box: {
         width: 200,
-        height: 150,
-        backgroundColor: '#ffffff', // White background for the cards
-        margin: 10,
-        borderRadius: 8,
+        height: 260,
+        backgroundColor: '#ffffff',
+        marginHorizontal: 10,
+        marginVertical: 5,
+        borderRadius: 10,
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
-            height: 2,
+            height: 4,
         },
         shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5, // Elevation for shadow on Android
+        shadowRadius: 5,
+        elevation: 8,
+        paddingBottom: 10,
+        justifyContent: 'space-between',
     },
     eventName: {
         color: '#333',
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
-        margin: 10, // Added margin for better text alignment
+        marginLeft: 5,
+        marginRight: 5,
+        marginTop: 5,
     },
     eventDescription: {
         color: '#666',
         fontSize: 14,
-        marginHorizontal: 10, // Horizontal margin for alignment
-        marginBottom: 10,
+        margin: 5,
+    },
+    eventTextBox: {
+        height: '100%',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start', // This will align items to the top
     },
     image: {
         width: '100%',
-        height: 120,
-        borderTopLeftRadius: 8,
-        borderTopRightRadius: 8, // Rounded corners on top only
+        height: 140,
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
     },
     bookingScrollView: {
         paddingHorizontal: 20,
-        paddingVertical: 10,
     },
     bookingBox: {
         backgroundColor: '#ffffff',
         padding: 15,
-        // marginVertical: 8,
         borderRadius: 10,
         borderWidth: 1,
-        borderColor: '#ddd', // Subtle border color
+        borderColor: '#ddd',
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
@@ -409,10 +374,10 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.22,
         shadowRadius: 2.22,
-        elevation: 3, // Elevation for shadow on Android
+        elevation: 3,
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'flex-start', // Aligns children elements to the left
+        alignItems: 'flex-start',
         marginBottom: 4,
         marginTop: 4,
     },
@@ -424,8 +389,8 @@ const styles = StyleSheet.create({
     bookingCompanyName: {
         fontSize: 16,
         fontWeight: 'bold',
+        color: '#555',
         marginTop: 5,
-        color: '#555', // Slightly lighter than the date text
     },
     bookingPosition: {
         fontSize: 15,
@@ -438,11 +403,6 @@ const styles = StyleSheet.create({
         color: '#555',
         marginTop: 5,
     },
-    createButton: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#007BFF', // Bootstrap primary blue
-    },
     deleteContainer: {
         display: 'flex',
         justifyContent: 'center',
@@ -452,58 +412,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         width: 100,
-        
         height: '95%',
         borderRadius: 8,
         marginLeft: 20,
-        
-    },
-    bookingButton: {
-        backgroundColor: '#007BFF', // Sets the button color to blue
-        padding: 10,
-        marginTop: 15,
-        borderRadius: 5,
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '100%', // Ensures the button stretches to fill its container
-    },
-    buttonText: {
-        color: 'white', // Ensures text is white for better contrast on the blue background
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    profileContainer: {
-        backgroundColor: '#f7f7f7', // Light grey background
-        padding: 20, // Padding for spacing inside the container
-        borderRadius: 10, // Rounded corners
-        shadowColor: "#000", // Shadow for 3D effect
-        shadowOffset: { width: 0, height: 1 }, // Shadow placement
-        shadowOpacity: 0.22, // Shadow opacity
-        shadowRadius: 2.22, // Shadow blur radius
-        elevation: 3, // Elevation for Android (shadow)
-        marginHorizontal: 20, // Horizontal margins
-        marginTop: 20, // Top margin
-        marginBottom: 10, // Bottom margin to separate from next sections
-    },
-    profileHeader: {
-        fontSize: 24, // Larger font size for headers
-        fontWeight: 'bold', // Bold font weight
-        color: '#333', // Dark grey for text color
-        marginBottom: 10, // Margin below the header for spacing
-    },
-    profileInfo: {
-        flexDirection: 'row', // Layout children in a row
-        justifyContent: 'space-between', // Space between items
-        marginBottom: 5, // Margin below each row
-    },
-    profileLabel: {
-        fontSize: 16, // Font size for labels
-        color: '#666', // Medium grey for label text
-        fontWeight: 'bold', // Bold font weight for labels
-    },
-    profileValue: {
-        fontSize: 16, // Font size for values
-        color: '#333', // Darker text for emphasis on content
     },
     noBookingView: {
         padding: 20,
@@ -513,5 +424,5 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#666',
     },
-    
 });
+

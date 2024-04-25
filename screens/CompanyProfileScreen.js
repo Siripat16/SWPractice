@@ -16,6 +16,7 @@ export default function CompanyProfileScreen({ navigation }) {
         name: "",
         description: "",
         phone: "",
+        email: "",
     });
 
     const [companyId, setCompanyId] = useState(""); // State to store the company ID
@@ -43,12 +44,13 @@ export default function CompanyProfileScreen({ navigation }) {
 
                     if (response.data.success) {
                         setCompanyId(response.data.data._id); // Store the company ID
+                        console.log(response.data.data)
                         setCompanyProfile({
                             name: response.data.data.companyName,
                             description: response.data.data.companyDescription,
                             phone: response.data.data.companyPhone,
-                            email: companyProfile.email  // Assuming email is managed separately
                         });
+                        
                     } else {
                         console.error('Fetching company data failed:', response.data.message);
                     }
@@ -60,7 +62,7 @@ export default function CompanyProfileScreen({ navigation }) {
 
         fetchUserDetails();
     }, []);
-
+    // console.log(companyProfile)
     const handleEdit = async () => {
         if (editable) {
             // If currently editable, then save the data

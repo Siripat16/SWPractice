@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import registrationLogo from "../assets/registration.png";
 import {
   View,
   Text,
