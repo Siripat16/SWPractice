@@ -101,6 +101,7 @@ export default function SignUpScreen({  }) {
             keyboardType="email-address"
             style={styles.input}
             onChangeText={(text) => handleInputChange("email", text)}
+            autoCapitalize="none"
           />
         </View>
         <View style={styles.inputContainer}>
