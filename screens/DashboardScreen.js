@@ -149,7 +149,7 @@ export default function DashboardScreen({ navigation }) {
     const deleteBooking = (bookingID) => {
         console.log(`Booking ${bookingID} deleted`);
     };
-    // console.log('user detail',userDetails);
+    console.log('user detail',userDetails);
     const [bookingError, setBookingError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
