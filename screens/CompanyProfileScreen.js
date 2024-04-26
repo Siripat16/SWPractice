@@ -18,6 +18,7 @@ export default function CompanyProfileScreen({ navigation }) {
         description: "",
         phone: "",
         email: "",
+        website: "",
     });
 
     const [companyId, setCompanyId] = useState(""); // State to store the company ID
@@ -45,11 +46,13 @@ export default function CompanyProfileScreen({ navigation }) {
 
                     if (response.data.success) {
                         setCompanyId(response.data.data._id); // Store the company ID
-                        console.log(response.data.data)
+                        // console.log('test1', response.data.data)
                         setCompanyProfile({
                             name: response.data.data.companyName,
                             description: response.data.data.companyDescription,
                             phone: response.data.data.companyPhone,
+                            email: response.data.data.companyEmail,
+                            website: response.data.data.companyWebsite,
                         });
                         
                     } else {
@@ -63,7 +66,8 @@ export default function CompanyProfileScreen({ navigation }) {
 
         fetchUserDetails();
     }, []);
-    // console.log(companyProfile)
+    console.log(companyProfile)
+    console.log('tests')
     const handleEdit = async () => {
         if (editable) {
             // If currently editable, then save the data
@@ -72,6 +76,8 @@ export default function CompanyProfileScreen({ navigation }) {
                     companyName: companyProfile.name,
                     companyPhone: companyProfile.phone,
                     companyDescription: companyProfile.description,
+                    companyEmail: companyProfile.email,
+                    companyWebsite: companyProfile.website
                 };
                 const response = await axios.put(`http://127.0.0.1:2000/api/v1/companies/updateCompany/${companyId}`, payload, {
                     headers: {
@@ -142,6 +148,30 @@ export default function CompanyProfileScreen({ navigation }) {
             ) : (
                 <Text style={styles.descriptionText}>{companyProfile.description}</Text>
             )}
+
+            {editable ? (
+                <TextInput
+                    style={styles.input}
+                    onChangeText={(text) => setCompanyProfile({ ...companyProfile, email: text })}
+                    value={companyProfile.email}
+                    autoCapitalize="none"
+                />
+            ) : (
+                <Text style={styles.descriptionText}>{companyProfile.email}</Text>
+            )}
+
+            {editable ? (
+                <TextInput
+                    style={styles.input}
+                    onChangeText={(text) => setCompanyProfile({ ...companyProfile, website: text })}
+                    value={companyProfile.website}
+                    autoCapitalize="none"
+                />
+            ) : (
+                <Text style={styles.descriptionText}>{companyProfile.website}</Text>
+            )}
+            
+            
             <Text style={styles.infoText}>{companyProfile.phone}</Text>
 
 
