@@ -47,96 +47,103 @@ export default function UserProfileScreen({ navigation }) {
     }
 
     async function fetchUserProfile(userID) {
-      try {
-          const url = `http://127.0.0.1:2000/api/v1/auth/user/${userID}`;
-          const response = await axios.get(url);
-
-          if (response.data.success && response.data.data) {
-              const profileData = response.data.data;
-              const imageUri = profileData.picture ? `data:image/jpeg;base64,${profileData.picture}` : null;
-              setUserProfile({
-                  name: profileData.name,
-                  email: profileData.emailAddress,
-                  phoneNumber: profileData.telPhone,
-                  profilePicture: imageUri,
-                  resume: profileData.resume.replace(/\\n/g, '\n'),
-              });
-              setName(profileData.name);
-              setEmail(profileData.emailAddress);
-              setPhoneNumber(profileData.telPhone);
-              setResume(profileData.resume.replace(/\\n/g, '\n'));
-          } else {
-              console.error('No user data found:', response.data);
-          }
-      } catch (error) {
-          console.error('Failed to fetch user profile:', error);
-      }
-  }
-
-    async function uploadImage() {
-      if (!imageUri) {
-          return;
-      }
-
-      const formData = new FormData();
-      let filename = imageUri.split('/').pop();
-      let match = /\.(\w+)$/.exec(filename);
-      let type = match ? `image/${match[1]}` : 'image/jpeg';
-
-      formData.append('file', {
-          uri: imageUri,
-          type: type,
-          name: filename || 'upload.jpg'
-      });
-
-      try {
-          const response = await axios({
-              url: `http://127.0.0.1:2000/api/v1/auth/user/${userID}`,
-              method: 'PUT',
-              data: formData,
-              headers: {
-                  'Content-Type': 'multipart/form-data',
-              },
-          });
-
-          // Check if the response indicates success
-          if (response.status === 200 && response.data.success) {
-               console.log('Success', 'Image uploaded successfully.');
-              // Optionally perform additional actions, e.g., updating state or UI
-          } else {
-              // Handle failure, perhaps due to server-side issues
-              Alert.alert('Upload Failed', 'The server encountered an issue.');
-          }
-      } catch (error) {
-          console.error("Error uploading image: ", error);
-          // Communicate the error to the user
-          Alert.alert('Upload Failed', 'Failed to upload image.');
-      }
-  }
-
-
-    async function saveProfile() {
         try {
             const url = `http://127.0.0.1:2000/api/v1/auth/user/${userID}`;
-            const response = await axios.put(url, {
-                name,
-                emailAddress: email,
-                telPhone: phoneNumber,
-                resume: resume
+            const response = await axios.get(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`  // Include the token in the header
+                }
             });
-
-            if (response.data.success) {
-                fetchUserProfile(userID);
-                setEditing(false);
-                // Alert.alert('Profile Updated', 'Your profile has been successfully updated.');
+    
+            if (response.data.success && response.data.data) {
+                const profileData = response.data.data;
+                const imageUri = profileData.picture ? `data:image/jpeg;base64,${profileData.picture}` : null;
+                setUserProfile({
+                    name: profileData.name,
+                    email: profileData.emailAddress,
+                    phoneNumber: profileData.telPhone,
+                    profilePicture: imageUri,
+                    resume: profileData.resume.replace(/\\n/g, '\n'),
+                });
+                setName(profileData.name);
+                setEmail(profileData.emailAddress);
+                setPhoneNumber(profileData.telPhone);
+                setResume(profileData.resume.replace(/\\n/g, '\n'));
             } else {
-                Alert.alert('Update Failed', 'Failed to update profile. Please try again.');
+                console.error('No user data found:', response.data);
             }
         } catch (error) {
-            console.error('Error updating profile:', error);
-            Alert.alert('Update Failed', 'Failed to update profile. Please try again.');
+            console.error('Failed to fetch user profile:', error);
         }
     }
+    
+
+    async function uploadImage() {
+        if (!imageUri) {
+            return;
+        }
+    
+        const formData = new FormData();
+        let filename = imageUri.split('/').pop();
+        let match = /\.(\w+)$/.exec(filename);
+        let type = match ? `image/${match[1]}` : 'image/jpeg';
+    
+        formData.append('file', {
+            uri: imageUri,
+            type: type,
+            name: filename || 'upload.jpg'
+        });
+    
+        try {
+            const response = await axios({
+                url: `http://127.0.0.1:2000/api/v1/auth/user/${userID}`,
+                method: 'PUT',
+                data: formData,
+                headers: {
+                    'Authorization': `Bearer ${token}`,  // Include the token in the header
+                    'Content-Type': 'multipart/form-data'
+                },
+            });
+    
+            if (response.status === 200 && response.data.success) {
+                console.log('Success', 'Image uploaded successfully.');
+            } else {
+                Alert.alert('Upload Failed', 'The server encountered an issue.');
+            }
+        } catch (error) {
+            console.error("Error uploading image: ", error);
+            Alert.alert('Upload Failed', 'Failed to upload image.');
+        }
+    }
+    
+
+
+  async function saveProfile() {
+    try {
+        const url = `http://127.0.0.1:2000/api/v1/auth/user/${userID}`;
+        const response = await axios.put(url, {
+            name,
+            emailAddress: email,
+            telPhone: phoneNumber,
+            resume: resume
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`  // Include the token in the header
+            }
+        });
+
+        if (response.data.success) {
+            fetchUserProfile(userID);
+            setEditing(false);
+        } else {
+            Alert.alert('Update Failed', 'Failed to update profile. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        Alert.alert('Update Failed', 'Failed to update profile. Please try again.');
+    }
+}
+
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({

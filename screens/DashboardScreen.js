@@ -66,18 +66,29 @@ export default function DashboardScreen({ navigation }) {
     const [bookings, setBookings] = useState([]);
     const fetchBookingDetails = async () => {
         if (!userDetails.userRole || !userDetails.userID) return;
-
+    
+        // Retrieve the token from AsyncStorage
+        const storedToken = await AsyncStorage.getItem('userToken');
+        if (!storedToken) {
+            console.error('No token found');
+            Alert.alert('Error', 'Authentication token is missing');
+            return;
+        }
+    
         let url = userDetails.userRole === 'admin' ?
             `http://127.0.0.1:2000/api/v1/bookingDetails/getBookingDetailsForAdmin/${userDetails.userID}` :
             `http://127.0.0.1:2000/api/v1/bookingDetails/getBookingDetailsByUser/${userDetails.userID}`;
-
+    
         try {
-            const response = await axios.get(url);
+            const response = await axios.get(url, {
+                headers: {
+                    Authorization: `Bearer ${storedToken}` // Include the token in the header
+                }
+            });
             if (response.data && response.data.success) {
                 setBookings(response.data.data);
                 setBookingError(response.data.data.length === 0);
                 setErrorMessage(response.data.data.length === 0 ? 'No booking information available' : '');
-                // console.log(bookings)
             } else {
                 setBookingError(true);
                 setErrorMessage('No booking information available');
@@ -91,26 +102,41 @@ export default function DashboardScreen({ navigation }) {
             }
         }
     };
-
+    
     // useEffect hook to call fetchBookingDetails
     useEffect(() => {
         fetchBookingDetails();
     }, [userDetails.userRole, userDetails.userID]);
     
     const fetchEvents = async () => {
+        console.log('--->', userDetails.userRole);
         if (!userDetails.userRole || !userDetails.userID) return;
-
+    
+        // Retrieve the token from AsyncStorage
+        const storedToken = await AsyncStorage.getItem('userToken');
+        if (!storedToken) {
+            console.error('No token found');
+            Alert.alert('Error', 'Authentication token is missing');
+            return;
+        }
+    
         let url;
         if (userDetails.userRole === 'admin') {
+            console.log('its here1');
             // For admins, fetch events related to the user
             url = `http://127.0.0.1:2000/api/v1/events/users/${userDetails.userID}`;
         } else {
             // For regular users, fetch all events
             url = 'http://127.0.0.1:2000/api/v1/events/getEvents';
+            console.log('its here');
         }
-
+    
         try {
-            const response = await axios.get(url);
+            const response = await axios.get(url, {
+                headers: {
+                    Authorization: `Bearer ${storedToken}` // Include the token in the header
+                }
+            });
             if (response.data && response.data.success) {
                 setEventData(response.data.data);
             } else {
@@ -122,8 +148,9 @@ export default function DashboardScreen({ navigation }) {
             Alert.alert('Error', 'Unable to fetch events');
         }
     };
+    
 
-    // useEffect hook to call fetchEvents
+    // useEffect hook to callf fetchEvents
     useEffect(() => {
         fetchEvents();
     }, [userDetails.userRole, userDetails.userID]);
